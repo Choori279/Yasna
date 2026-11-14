@@ -11,7 +11,7 @@ Démontrer concrètement la valeur de Yasna sur un **périmètre réduit et réa
 - Connexion **lecture seule** + lien contexte métier ↔ BDD (y compris triggers/objets SQL si présents).
 - Première analyse en **suggestions** (potentiels manques), puis **spécification du besoin** par l'utilisateur.
 - **Pipeline simplifié** (cf. phase 7) : analyse en SELECT avec contrôles déterministes, revue des résultats.
-- Sur **demande explicite** de l'utilisateur : génération des scripts **UPDATE + rollback**, avec **double validation (MOA + technique)** et revue de script.
+- Après un SELECT OK : **dossier de revue** transmis au ou aux **Décideur(s)** (circuit de validation paramétrable par projet) ; proposition **validée** → génération des scripts **UPDATE + rollback**, **refusée avec motif** → retour à l'Opérationnel. L'Opérationnel ne peut pas générer d'UPDATE.
 
 L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le combo « compréhension métier + analyse technique + propositions sécurisées », avec une **action et un attendu clairs à chaque phase**.
 
@@ -28,8 +28,8 @@ L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le comb
 | Base de connaissances | Règles de gestion du projet figées à l'initialisation | RAG avancé / fine-tuning |
 | Connexion BDD | Lecture seule (rôle à privilèges minimaux, `GRANT SELECT` limités) + schéma, statistiques agrégées, triggers/objets SQL si présents ; SELECT bornés (LIMIT, timeout) et **contrôles déterministes** (sqlglot + EXPLAIN) | Écriture directe par l'outil |
 | Analyse | Suggestions de manques (transformables en besoin) + pipeline simplifié (SELECT) | Cartographie métier↔technique dédiée |
-| Modifications | UPDATE + rollback générés **sur demande explicite**, jamais exécutés automatiquement ; triggers impactés classés réversibles / non réversibles ; contrôle de dérive embarqué ; rollback testable | Exécution automatique ; refonte de schéma (3NF) |
-| Gouvernance | **Double validation MOA (métier) + technique (MOE/DSI)** par deux personnes distinctes + revue de script structurée + journalisation | Homologation complète |
+| Modifications | UPDATE + rollback générés **après validation du dossier de revue** par le ou les Décideur(s), jamais exécutés automatiquement ; l'UPDATE réutilise la clause WHERE du SELECT validé (SET seulement généré par le LLM) ; triggers impactés classés réversibles / non réversibles ; contrôle de dérive embarqué ; rollback testable | Exécution automatique ; refonte de schéma (3NF) |
+| Gouvernance | **Circuit de validation paramétrable par projet** (défaut : 1 validation par un Décideur, auto-validation interdite) + dossier de revue + journalisation | Homologation complète |
 | Interface | Streamlit derrière **reverse proxy** (TLS, headers de sécurité) + authentification **OIDC** | Interface avancée |
 | IA | **API externe configurable par défaut** (Mistral, données fictives uniquement) ; mode local optionnel | Fine-tuning |
 | Déploiement | Docker Compose basique | Production hardened |
@@ -48,7 +48,7 @@ L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le comb
 **Garde-fous** : chat limité aux documents projet non personnels ; tout contenu des documents est traité comme **non fiable** (balisage instructions/données dans les prompts).
 
 ### Phase 2 – Initialisation du projet
-- **Validation explicite par l'utilisateur** de la synthèse du contexte, puis initialisation du projet (base de connaissances figée, paramètres, journalisation append-only).
+- **Validation du contexte métier figé par le Décideur** (propriétaire des données), puis initialisation du projet : base de connaissances figée, paramètres, **paramétrage du circuit de validation par l'Administrateur** (nombre de validations distinctes requises — 1 ou 2 ; rôle ou profil exigé pour chaque validation ; auto-validation autorisée ou interdite — selon le processus de validation réel de l'organisation, recueilli lors du cadrage avec la MOA et la DSI), journalisation append-only.
 - Préparer le **jeu de données de test « legacy »** avec des anomalies **injectées et connues à l'avance** : liste de référence documentée (type d'anomalie, nombre de lignes, règle de gestion concernée), cohérente avec les règles de gestion du CDC PARINDIE (et ses incohérences volontaires).
 
 **Livrable** : projet initialisé + base de connaissances + jeu de données de test avec anomalies injectées + liste de référence.
@@ -75,7 +75,9 @@ L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le comb
 **Livrable** : liste structurée de suggestions avec explications.
 
 ### Phase 6 – Spécification du besoin utilisateur
-- L'utilisateur exprime son besoin via l'interface (ex. : « passer les valeurs NULL à 0 dans la table des montants »), ou à partir d'une suggestion de la phase 5.
+- L'utilisateur (rôle **Opérationnel**) exprime son besoin via l'interface (ex. : « normaliser le format des numéros de téléphone »), ou à partir d'une suggestion de la phase 5.
+
+**Note** : remplacer NULL par 0 sur un montant transforme « inconnu » en « aucun droit » : seule la MOA peut trancher.
 
 **Livrable** : besoin formalisé.
 
@@ -93,24 +95,29 @@ L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le comb
 
 **Livrable** : requête SELECT validée et journalisée (identifiant + hash) + statistiques + explications + revue.
 
-### Phase 8 – Génération des scripts sur demande explicite (UPDATE + rollback)
-- L'utilisateur demande explicitement la requête en mode UPDATE ; l'orchestrateur (machine à états) exige un **SELECT validé et journalisé**, référencé par son identifiant et son hash, avec **exactement le même périmètre**.
-- Génération de :
-  - le **script SQL de modification** : commentaires explicatifs, estimation des lignes impactées, **liste des triggers impactés / effets de bord classés en « réversibles par le rollback » / « non réversibles »** (avec description de l'effet ; un effet non réversible est signalé explicitement dans la revue de script) ;
+### Phase 8 – Revue décisionnelle puis génération des scripts (UPDATE + rollback)
+
+Après la phase 7 : SELECT OK sur l'échantillon → **proposition transmise au(x) Décideur(s)** → revue → **validée** (génération du script UPDATE + rollback) ou **refusée avec motif** (retour à l'Opérationnel).
+
+- L'orchestrateur (machine à états) constitue le **dossier de revue** : besoin, SELECT validé et journalisé (identifiant + hash, **exactement le même périmètre**), **COUNT total des lignes concernées**, extrait d'échantillon, modification envisagée en langage clair, **triggers concernés**.
+- Le dossier est revu par le ou les **Décideur(s)** conformément au **circuit de validation paramétrable par projet** (recueilli lors du cadrage avec la MOA et la DSI, paramétré par l'Administrateur à l'initialisation du projet — phase 2) : nombre de validations distinctes requises (1 ou 2), rôle ou profil exigé pour chaque validation, auto-validation autorisée ou interdite. **Valeurs par défaut : 1 validation par un Décideur, auto-validation interdite.** Toute modification du circuit est réservée à l'Administrateur et journalisée.
+- Proposition **validée** → génération de :
+  - le **script SQL de modification** : le code réutilise **la clause WHERE du SELECT validé** (analyse sqlglot) — le LLM ne génère que la **partie SET**, et le vérifie par le code (même périmètre) ; commentaires explicatifs, **liste des triggers impactés / effets de bord classés en « réversibles par le rollback » / « non réversibles »** (avec description de l'effet ; un effet non réversible est signalé explicitement dans le dossier de revue) ;
   - le **script de rollback testable** (transaction + sauvegarde préalable : table de backup **créée dans la même transaction** que l'UPDATE).
-- Chaque script UPDATE embarque un **contrôle de dérive des données** : recomptage des lignes ciblées en tête de script, **annulation de la transaction** si le nombre diffère de l'estimation validée au-delà d'une tolérance configurable.
+- Chaque script UPDATE embarque un **contrôle de dérive des données** : recomptage des lignes ciblées en tête de script, **annulation de la transaction** si le nombre diffère au-delà d'une tolérance paramétrable par projet.
+- Chaque script porte un **en-tête** indiquant les valideurs, l'horodatage, le **hash du SELECT validé** et la mention **« Exécution hors Yasna, sous la responsabilité de l'exécutant »**. Yasna s'arrête à la **génération du script** : aucune validation après génération.
 - La table de backup contient des données personnelles : durée de conservation et suppression à prévoir (`À COMPLÉTER`).
-- **Double validation obligatoire** : validation **MOA (métier)** **et** validation **technique (MOE/DSI)**, par **deux personnes distinctes** (la personne qui exprime le besoin ne peut pas valider seule) + **revue de script structurée** (checklist), chaque validation étant horodatée, nominative et journalisée.
+- Proposition **refusée avec motif** → retour à l'Opérationnel (retour au besoin, phase 6).
 - Jamais d'exécution automatique.
 
-**Livrable** : scripts UPDATE + rollback + résumé des impacts + trace de double validation.
+**Livrable** : scripts UPDATE + rollback + résumé des impacts + trace des validations du dossier de revue.
 
 ## Livraison du PoC
 
 *(Hors parcours en 8 phases.)*
 
 - Documenter les choix techniques principaux.
-- Lister les points de conformité respectés : lecture seule, SELECT bornés et contrôlés de façon déterministe (sqlglot, EXPLAIN), double validation humaine obligatoire (MOA + technique) et revue de script, minimisation des données envoyées au LLM, couche fournisseur interchangeable, pas de secrets en dur, chat de cadrage limité aux documents projet, rollback testable, contrôle de dérive, journalisation.
+- Lister les points de conformité respectés : lecture seule, SELECT bornés et contrôlés de façon déterministe (sqlglot, EXPLAIN), circuit de validation paramétrable par projet (décisions du ou des Décideurs), minimisation des données envoyées au LLM, couche fournisseur interchangeable, pas de secrets en dur, chat de cadrage limité aux documents projet, rollback testable, contrôle de dérive, journalisation.
 - Préparer une démo claire et reproductible du PoC.
 - Rédiger un court retour d'expérience (ce qui a bien fonctionné / points d'amélioration).
 
@@ -129,7 +136,7 @@ Besoins piégés qui doivent **tous être bloqués** :
 
 ## Critères de succès du PoC
 
-- [ ] Une table métier est parcourue de bout en bout via les 8 phases (cadrage → projet → connexion → lien → suggestions → besoin → SELECT validé → scripts).
+- [ ] Une table métier est parcourue de bout en bout via les 8 phases (cadrage → projet → connexion → lien → suggestions → besoin → SELECT validé → revue décisionnelle → scripts).
 - [ ] Le chat de cadrage permet de figer un contexte métier à partir de la documentation projet, avec validation explicite de l'utilisateur.
 - [ ] Les liens entre règles de gestion et éléments BDD (dont triggers si présents) sont établis.
 - [ ] La première analyse produit des suggestions de manques expliquées, transformables en besoin (aucune action).
@@ -137,8 +144,9 @@ Besoins piégés qui doivent **tous être bloqués** :
 - [ ] **Taux de détection des anomalies injectées** : `À COMPLÉTER` (ex. ≥ 80 %) par rapport à la liste de référence.
 - [ ] **0 requête hors périmètre exécutée** (table, colonnes, types d'instruction).
 - [ ] **100 % des requêtes malveillantes du jeu de tests de sécurité rejetées** par le contrôle sqlglot (chaque refus journalisé avec son motif).
-- [ ] Sur demande explicite, les scripts UPDATE + rollback (testable) sont générés, avec estimation d'impact, triggers impactés classés réversibles / non réversibles, et **contrôle de dérive embarqué** ; **100 % des scripts** comportent le contrôle de dérive et un rollback testable.
-- [ ] **Double validation MOA (métier) + technique (MOE/DSI)** obligatoire, par deux personnes distinctes, journalisée ; aucun script exécuté automatiquement.
+- [ ] Après validation du dossier de revue par le circuit paramétré, les scripts UPDATE + rollback (testable) sont générés, avec estimation d'impact, triggers impactés classés réversibles / non réversibles, et **contrôle de dérive embarqué** ; **100 % des scripts** comportent le contrôle de dérive, un rollback testable et un **en-tête** (valideurs, horodatage, hash du SELECT validé, mention « Exécution hors Yasna, sous la responsabilité de l'exécutant »).
+- [ ] **Circuit de validation paramétrable** appliqué (par défaut : 1 validation par un Décideur, auto-validation interdite), chaque validation horodatée, nominative et journalisée ; l'Opérationnel ne peut pas générer d'UPDATE ; aucun script exécuté automatiquement.
+- [ ] **100 % des UPDATE générés réutilisent strictement la clause WHERE du SELECT validé** (le LLM ne génère que la partie SET — vérification par le code).
 - [ ] L'outil fonctionne via l'**API externe configurée (Mistral)** — autorisée uniquement car données fictives — et la couche fournisseur est interchangeable sans modification de code (mode local optionnel).
 - [ ] Une démo est possible en moins de 15-20 minutes.
 

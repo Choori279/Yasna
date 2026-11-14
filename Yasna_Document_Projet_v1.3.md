@@ -59,7 +59,9 @@ Yasna est un outil intelligent, simple et pensé pour le secteur public. Il comb
    L'analyse fait ressortir les manques et incohérences potentielles (doublons, données manquantes, incohérences, formats incorrects, valeurs aberrantes), chacune expliquée par la règle de gestion concernée. **Aucune action proposée à ce stade** : chaque suggestion peut être transformée en besoin en un clic.
 
 6. **Spécification du besoin utilisateur**  
-   L'utilisateur exprime — ou reprend une suggestion pour exprimer — son besoin de nettoyage (ex. : « passer les valeurs NULL à 0 dans la table des montants »).
+   L'utilisateur (rôle **Opérationnel**) exprime — ou reprend une suggestion pour exprimer — son besoin de nettoyage (ex. : « normaliser le format des numéros de téléphone »).
+
+   **Note** : remplacer NULL par 0 sur un montant transforme « inconnu » en « aucun droit » : seule la MOA peut trancher.
 
 7. **Traitement multi-agents (analyse en SELECT)**  
    - **Agent 1** : récupération de la base de connaissances du projet (règles de gestion + contexte).  
@@ -67,15 +69,15 @@ Yasna est un outil intelligent, simple et pensé pour le secteur public. Il comb
    - **Agent 3** : agrégation des règles de gestion et des **statistiques agrégées** (jamais de lignes brutes) pour confirmation.  
    - **Agent 4** : revue globale et communication des résultats à l'utilisateur.
 
-8. **Génération des scripts sur demande explicite (UPDATE + rollback)**  
-   L'utilisateur demande spécifiquement la requête en mode UPDATE : les 4 agents retravaillent pour produire le **script SQL de modification** (avec explications, estimation des lignes impactées et **liste des triggers impactés / effets de bord**, classés en **réversibles par le rollback** / **non réversibles**) ainsi que le **script de rollback testable** (transaction + sauvegarde préalable : table de backup ou export ciblé, créés **dans la même transaction** que l'UPDATE). Chaque script UPDATE embarque un **contrôle de dérive des données** (recomptage des lignes ciblées en tête de script ; annulation de la transaction si le nombre diffère de l'estimation validée au-delà d'une tolérance configurable). **Double validation obligatoire (MOA métier + MOE/DSI technique, deux personnes distinctes) au niveau du projet et revue de script obligatoires** avant toute exécution.
+8. **Revue décisionnelle puis génération des scripts (UPDATE + rollback)**  
+   Après la phase 7 : SELECT OK sur l'échantillon → **proposition transmise au(x) Décideur(s)** → revue (cf. section 6, « Rôles et circuit de validation ») → **validée** (génération du script UPDATE + rollback) ou **refusée avec motif** (retour à l'Opérationnel). Le **dossier de revue** comprend : besoin, SELECT validé et journalisé (identifiant + hash, **exactement le même périmètre**), **COUNT total des lignes concernées**, extrait d'échantillon, modification envisagée en langage clair, **triggers concernés**. Proposition **validée** : le code réutilise **la clause WHERE du SELECT validé** (sqlglot) — le LLM ne génère que la **partie SET**, vérification par le code — et produit le **script SQL de modification** (explications, estimation des lignes impactées, **liste des triggers impactés / effets de bord** classés **réversibles par le rollback** / **non réversibles**) ainsi que le **script de rollback testable** (transaction + sauvegarde préalable : table de backup créée **dans la même transaction** que l'UPDATE). Chaque script UPDATE embarque un **contrôle de dérive des données** (recomptage des lignes ciblées en tête de script ; annulation de la transaction si le nombre diffère au-delà d'une tolérance paramétrable par projet). Chaque script porte un **en-tête** (valideurs, horodatage, hash du SELECT validé, mention « Exécution hors Yasna, sous la responsabilité de l'exécutant ») ; **Yasna s'arrête à la génération du script**.
 
-**Validation humaine obligatoire** à chaque étape de proposition ou d'action. Elle est conçue pour rester rapide et traçable : validation par lot, revue de script structurée (checklist), workflow de **double validation MOA + technique** au niveau du projet, journalisation automatique des validations. **Aucun script de modification n'est jamais exécuté automatiquement par Yasna.**  
+**Validation humaine obligatoire** à chaque étape de proposition ou d'action, selon un **circuit de validation paramétrable par projet** qui reproduit le **processus de validation réel de l'organisation** (cf. section 6) : revue des propositions par le ou les **Décideur(s)**, journalisation automatique des validations. **Aucun script de modification n'est jamais exécuté automatiquement par Yasna.**  
 
 **Souveraineté** : **API externe configurable par défaut** (fournisseur souverain), mode local optionnel. Le fournisseur LLM est interchangeable sans modification de code (couche fournisseur, configuration par variables d'environnement). En production, tout envoi de données sensibles vers le LLM exige un fournisseur **qualifié SecNumCloud** sur le service d'IA utilisé (sinon l'envoi est bloqué par le code).
 
 **Valeur ajoutée :**
-- Parcours guidé avec une action et un attendu clairs à chaque phase (cadrage, validation du contexte, analyse, spécification, revue, double validation MOA + technique).
+- Parcours guidé avec une action et un attendu clairs à chaque phase (cadrage, validation du contexte, analyse, spécification, revue décisionnelle).
 - Réduction forte des délais (de plusieurs mois à quelques semaines).
 - Allègement de la charge des experts techniques et métier.
 - Préparation réelle des données pour une IA utile.
@@ -117,9 +119,30 @@ Yasna doit respecter les exigences du secteur public français :
 - **ANSSI** : DevSecOps, moindre privilège, analyse statique et dynamique, gestion sécurisée des secrets, recommandations pour les systèmes d'IA (autorisations **indépendantes du modèle**, validation humaine pour les opérations critiques, arrêt d'urgence).
 - **DINUM** : souveraineté, interopérabilité, logiciel libre encouragé.
 
-### Double validation obligatoire
+### Rôles et circuit de validation
 
-Avant toute génération de script exécutable : une **validation MOA (métier)** **et** une **validation technique (MOE/DSI)**, par **deux personnes distinctes**. La personne qui exprime le besoin ne peut pas valider seule le script. Chaque validation est **horodatée, nominative et journalisée** dans le journal d'audit.
+**Trois rôles** :
+
+| Rôle | Profil réel | Droits |
+|---|---|---|
+| **Opérationnel** | Chargé de qualité des données, MOE applicative, analyste de données (pas un agent d'instruction) | Phases 1 à 7 : cadrage, analyse, SELECT sur petit échantillon. Ne peut pas générer d'UPDATE. |
+| **Décideur** | MOA propriétaire des données (responsable métier de l'application) ; éventuellement un responsable technique selon l'organisation | Valide le contexte métier figé (phase 2), revoit les propositions, les valide ou les refuse, déclenche la génération de l'UPDATE. |
+| **Administrateur** | Équipe technique / exploitation de l'administration | Comptes et rôles, connexion BDD, paramétrage du circuit de validation, arrêt d'urgence. MFA obligatoire. N'est pas utilisé au quotidien. |
+
+**Parcours après la phase 7** : SELECT OK sur l'échantillon → proposition transmise au(x) Décideur(s) → revue → **validée** (génération du script UPDATE + rollback) ou **refusée avec motif** (retour à l'Opérationnel).
+
+**Circuit de validation paramétrable par projet** : le circuit **reproduit le processus de validation réel de l'organisation**. Il est recueilli lors du cadrage avec la MOA et la DSI, puis paramétré par l'Administrateur à l'initialisation du projet (phase 2) :
+- nombre de validations distinctes requises (1 ou 2) ;
+- rôle ou profil exigé pour chaque validation (ex. MOA seule, ou MOA + responsable technique) ;
+- auto-validation (un Décideur valide sa propre proposition) : autorisée ou interdite.
+
+**Valeurs par défaut** : 1 validation par un Décideur, auto-validation **interdite**. Toute modification du circuit est réservée à l'Administrateur et journalisée.
+
+**Dossier de revue** : besoin, SELECT, COUNT total des lignes concernées, extrait d'échantillon, modification envisagée en langage clair, triggers concernés.
+
+**UPDATE lié au SELECT validé** : le code réutilise la clause WHERE du SELECT validé (sqlglot), le LLM ne génère que la partie SET. Vérification par le code.
+
+**Responsabilité** : Yasna s'arrête à la génération du script. L'en-tête du script indique les valideurs, l'horodatage, le hash du SELECT validé et la mention **« Exécution hors Yasna, sous la responsabilité de l'exécutant »**. Aucune validation après génération du script.
 
 ### Données envoyées au LLM (minimisation)
 
@@ -152,7 +175,7 @@ Le journal d'audit est en **ajout seul (append-only)**, avec entrées **chaîné
 
 ### Authentification et exposition de l'UI
 
-Streamlit n'offre pas d'authentification robuste et gère mal les headers de sécurité : un **reverse proxy** (Caddy ou nginx) est placé devant l'UI et l'API, chargé du **TLS** et des **headers de sécurité** (CSP, etc.), avec une authentification **OIDC** (ProConnect envisageable pour les agents publics, sinon l'annuaire de l'administration). Les rôles (**demandeur, valideur MOA, valideur technique, administrateur**) sont gérés côté API.
+Streamlit n'offre pas d'authentification robuste et gère mal les headers de sécurité : un **reverse proxy** (Caddy ou nginx) est placé devant l'UI et l'API, chargé du **TLS** et des **headers de sécurité** (CSP, etc.), avec une authentification **OIDC** (ProConnect envisageable pour les agents publics, sinon l'annuaire de l'administration). Les rôles (**opérationnel, décideur, administrateur**) sont gérés côté API.
 
 ### Bases de données supportées
 
@@ -177,13 +200,13 @@ Pour les administrations de l'État, leurs opérateurs (article 31 de la loi SRE
 
 ### Autres exigences
 
-- Validation humaine obligatoire avant toute modification de données (double validation MOA + technique, revue de script structurée, journalisation).
+- Validation humaine obligatoire avant toute génération de script de modification de données (circuit de validation paramétrable par projet — cf. section 6, dossier de revue, journalisation).
 - **API externe configurable par défaut + mode local optionnel** (couche fournisseur interchangeable, cf. section 7).
 - Conteneurisation sécurisée (non-root, capabilities droppées, réseau isolé).
 - Pas de secrets en dur, validation stricte des entrées, headers de sécurité (via reverse proxy).
 - **Chat de cadrage** : seuls des documents projet non personnels (circulaires, SFD, STD, DEX…) y sont chargés ; ces documents transitent vers le fournisseur du LLM configuré. Aucune donnée personnelle (bénéficiaires…) ne doit y être saisie.
 - **Connexion BDD** : rôle PostgreSQL strictement lecture seule à l'analyse ; requêtes SELECT bornées (LIMIT / échantillonnage, timeout) et contrôlées de façon déterministe (cf. ci-dessus).
-- **Effets de bord SQL** : tout script de modification généré doit lister les triggers/contraintes impactés, classés en **réversibles par le rollback** / **non réversibles** (avec description de l'effet) ; un effet non réversible est signalé explicitement dans la revue de script. Le rollback doit être testable (transaction + sauvegarde préalable dans la même transaction que l'UPDATE). La table de backup contient des données personnelles : durée de conservation et suppression à prévoir (`À COMPLÉTER`).
+- **Effets de bord SQL** : tout script de modification généré doit lister les triggers/contraintes impactés, classés en **réversibles par le rollback** / **non réversibles** (avec description de l'effet) ; un effet non réversible est signalé explicitement dans le dossier de revue. Le rollback doit être testable (transaction + sauvegarde préalable dans la même transaction que l'UPDATE). La table de backup contient des données personnelles : durée de conservation et suppression à prévoir (`À COMPLÉTER`).
 
 ## 7. Stack technique et architecture
 
@@ -214,7 +237,7 @@ Structure modulaire recommandée : `core` / `rag` / `analysis` / `sql_generator`
 ## 8. Roadmap produit et PoC
 
 **Objectif du PoC**  
-Démontrer la valeur de Yasna sur un périmètre réaliste et maîtrisable : **une table métier prioritaire** (exemple : table des bénéficiaires d'aides sociales), en déroulant le **parcours complet** : cadrage par la documentation projet + chat IA, initialisation du projet (avec validation explicite du contexte), connexion lecture seule, lien contexte métier ↔ BDD (y compris objets SQL), première analyse en suggestions, spécification du besoin, pipeline multi-agents (SELECT), puis génération de scripts UPDATE + rollback sur demande explicite, avec double validation MOA + technique et revue de script.  
+Démontrer la valeur de Yasna sur un périmètre réaliste et maîtrisable : **une table métier prioritaire** (exemple : table des bénéficiaires d'aides sociales), en déroulant le **parcours complet** : cadrage par la documentation projet + chat IA, initialisation du projet (avec validation du contexte figé par le Décideur et paramétrage du circuit de validation par l'Administrateur), connexion lecture seule, lien contexte métier ↔ BDD (y compris objets SQL), première analyse en suggestions, spécification du besoin, pipeline multi-agents (SELECT), puis proposition transmise au(x) Décideur(s), revue et génération des scripts UPDATE + rollback sur validation.  
 
 Pour le PoC, le pipeline multi-agents est **simplifié** (cf. spécification détaillée du PoC) ; le pipeline 4 agents complet reste la **cible post-PoC**.  
 

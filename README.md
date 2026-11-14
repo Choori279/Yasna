@@ -14,7 +14,7 @@ Outil d'analyse et de nettoyage intelligent de bases de données pour les admini
 - **API externe configurable par défaut** (fournisseur souverain), mode local **optionnel** : couche fournisseur LLM interchangeable via variables d'environnement (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_PROVIDER_SECNUMCLOUD`), aucune modification de code pour changer de fournisseur ; jamais de clés en dur
 - Le LLM ne reçoit **que** le schéma, les objets SQL et des **statistiques agrégées** — jamais de lignes brutes ; pseudonymisation obligatoire si des exemples de lignes sont nécessaires
 - Connexion BDD **lecture seule** avec contrôles **déterministes** (GRANT limités, `sqlglot`, `EXPLAIN`, `LIMIT`, `statement_timeout`) ; aucun script de modification exécuté automatiquement
-- **Double validation obligatoire** avant toute modification : validation MOA (métier) **et** validation technique (MOE/DSI), par deux personnes distinctes, avec **rollback systématique**
+- **Circuit de validation paramétrable par projet**, reproduisant le processus de validation réel de l'organisation (par défaut : 1 validation par un Décideur, auto-validation interdite) ; le LLM ne génère que la partie SET, la clause WHERE du SELECT validé est réutilisée par le code ; les scripts sont générés après validation, jamais exécutés par Yasna, avec **rollback systématique**
 - Conformité CNIL / RGPD / ANSSI : minimisation des données, journal d'audit en ajout seul (append-only, chaîné par hash), **arrêt d'urgence**, conteneurs non-root sécurisés
 - Exposition sécurisée : **reverse proxy** (TLS, headers de sécurité) devant l'UI et l'API + authentification **OIDC** (ex. ProConnect)
 
