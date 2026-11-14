@@ -59,21 +59,41 @@ flowchart LR
 
 ## 2. Machine à états de l'orchestrateur
 
-L'ordre des phases est imposé par le **code** (machine à états), pas par le prompt : chaque phase a un état d'entrée requis et l'API refuse toute action hors séquence. La génération de l'UPDATE exige un SELECT **validé et journalisé**, référencé par son **identifiant** et son **hash**, portant sur **exactement le même périmètre**.
+L'ordre des phases est imposé par le **code** (machine à états), pas par le prompt : chaque phase a un état d'entrée requis et l'API refuse toute action hors séquence. La revue exige un SELECT **validé et journalisé**, référencé par son **identifiant** et son **hash**, portant sur **exactement le même périmètre** ; la génération de l'UPDATE n'est déclenchée que par une **proposition validée** par le circuit décisionnel.
 
 ```mermaid
 stateDiagram-v2
+    state "ContexteValidé" as ContexteValide
+    state "Connecté" as Connecte
+    state "Lié" as Lie
+    state "Validé" as Valide
+    state "ScriptsGénérés" as ScriptsGeneres
+    state "ArretUrgence" as ArretUrgence
+
     [*] --> Cadrage
-    Cadrage --> ContexteValide : synthèse validée explicitement
-    ContexteValide --> Connecte : projet initialisé
+    Cadrage --> ContexteValide : synthèse du contexte validée par le Décideur
+    ContexteValide --> Connecte : projet initialisé (circuit de validation paramétré par l'Administrateur)
     Connecte --> Lie : schéma + stats agrégées + objets SQL extraits
     Lie --> Suggestions : liens règles ↔ BDD établis
-    Suggestions --> Besoin : besoin exprimé (ou issu d'une suggestion)
-    Besoin --> SelectValide : SELECT généré, contrôlé (sqlglot + EXPLAIN), exécuté borné, validé et journalisé (id + hash)
-    SelectValide --> ScriptsGeneres : demande explicite UPDATE + rollback (même périmètre que le SELECT)
-    ScriptsGeneres --> ScriptsValides : double validation MOA (métier) + technique (MOE/DSI) et revue de script
-    ScriptsValides --> Telecharges : téléchargement des scripts
-    Telecharges --> [*]
+    Suggestions --> Besoin : besoin exprimé par l'Opérationnel (ou issu d'une suggestion)
+    Besoin --> SelectOK : SELECT généré, contrôlé (sqlglot + EXPLAIN), exécuté borné, validé et journalisé (id + hash)
+    SelectOK --> [*] : fin sans modification
+    SelectOK --> EnRevue : dossier de revue transmis au(x) Décideur(s)
+    EnRevue --> Besoin : refusée avec motif (retour à l'Opérationnel)
+    EnRevue --> Valide : proposition validée (génération déclenchée)
+    Valide --> ScriptsGeneres : UPDATE + rollback générés (WHERE du SELECT validé réutilisé, SET par le LLM, en-tête des scripts)
+    ScriptsGeneres --> [*]
+
+    Cadrage --> ArretUrgence : arrêt d'urgence (administrateur)
+    ContexteValide --> ArretUrgence : arrêt d'urgence (administrateur)
+    Connecte --> ArretUrgence : arrêt d'urgence (administrateur)
+    Lie --> ArretUrgence : arrêt d'urgence (administrateur)
+    Suggestions --> ArretUrgence : arrêt d'urgence (administrateur)
+    Besoin --> ArretUrgence : arrêt d'urgence (administrateur)
+    SelectOK --> ArretUrgence : arrêt d'urgence (administrateur)
+    EnRevue --> ArretUrgence : arrêt d'urgence (administrateur)
+    Valide --> ArretUrgence : arrêt d'urgence (administrateur)
+    ScriptsGeneres --> ArretUrgence : arrêt d'urgence (administrateur)
 ```
 
 ---

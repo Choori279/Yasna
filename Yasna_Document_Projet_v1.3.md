@@ -228,8 +228,8 @@ Respect d'une séparation claire des responsabilités (approche type MVC / Clean
 
 **Orchestrateur = machine à états.** Le déroulé des 8 phases est imposé par le **code**, pas par le prompt :
 - Chaque phase a un **état d'entrée requis** ; l'API refuse toute action hors séquence.
-- La génération de l'UPDATE exige un SELECT **validé et journalisé**, référencé par son **identifiant** et son **hash**. Le script UPDATE doit porter sur **exactement le même périmètre** que ce SELECT.
-- Un **arrêt d'urgence** (administrateur) coupe les appels LLM et la connexion BDD, et est journalisé.
+- La génération de l'UPDATE exige une **proposition validée par le circuit décisionnel**, portant sur un SELECT **validé et journalisé**, référencé par son **identifiant** et son **hash**. Le script UPDATE porte sur **exactement le même périmètre** que ce SELECT (clause WHERE réutilisée, vérification par le code).
+- Un **arrêt d'urgence** (administrateur) coupe les appels LLM et la connexion BDD, et est journalisé ; l'état **ArretUrgence** est accessible depuis **tous** les états de la machine à états (cf. document Schémas).
 - Le journal d'audit est **append-only, chaîné par hash**.
 
 Structure modulaire recommandée : `core` / `rag` / `analysis` / `sql_generator` / `agents` / `llm` (couche fournisseur) / `db_adapters` / `api` / `ui`.
