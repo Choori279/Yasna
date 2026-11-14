@@ -105,6 +105,7 @@ sequenceDiagram
     autonumber
     participant U as Opérationnel (utilisateur)
     participant D as Décideur (MOA)
+    participant A as Administrateur
     participant UI as UI Streamlit
     participant API as API FastAPI
     participant ORCH as Orchestrateur (machine à états)
@@ -127,7 +128,7 @@ sequenceDiagram
     Note over U,AUD: Phase 2 — Initialisation du projet
     D->>UI: Valide le contexte métier figé (Décideur)
     UI->>API: Création du projet
-    UI->>API: Paramétrage du circuit de validation par l'Administrateur
+    A->>API: Paramétrage du circuit de validation (1 ou 2 validations, rôles exigés, auto-validation)
     API->>RAG: Contexte figé
     API->>AUD: Journalisation (création projet, circuit, accès)
 
@@ -215,9 +216,9 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    P1["Phase 1 : Cadrage<br/>upload docs projet + chat IA"] --> D1{"Contexte validé<br/>explicitement par<br/>l'utilisateur ?"}
+    P1["Phase 1 : Cadrage<br/>upload docs projet + chat IA"] --> D1{"Contexte métier<br/>validé par le<br/>Décideur ?"}
     D1 -- non --> P1
-    D1 -- oui --> P2["Phase 2 : Projet initialisé<br/>base de connaissances figée + journalisation"]
+    D1 -- oui --> P2["Phase 2 : Projet initialisé<br/>base de connaissances figée + journalisation<br/>circuit de validation paramétré par l'Administrateur<br/>(validations 1 ou 2, rôles exigés, auto-validation)"]
     P2 --> P3["Phase 3 : Connexion BDD<br/>lecture seule — schéma, stats agrégées, triggers"]
     P3 --> P4["Phase 4 : Lien contexte métier ↔ BDD<br/>(tables, colonnes, triggers, contraintes)"]
     P4 --> P5["Phase 5 : 1ère analyse<br/>suggestions de manques uniquement<br/>(transformables en besoin en un clic)"]
@@ -239,9 +240,9 @@ flowchart TD
 | Acteur | Rôle dans le parcours | Lieu | Données manipulées |
 |--------|----------------------|------|-------------------|
 | **Opérationnel** (utilisateur, ex. chargé de qualité des données, MOE applicative, analyste de données) | Upload des documents, chat de cadrage, expression du besoin, lancement de l'analyse (phases 1 à 7) ; ne peut pas générer d'UPDATE | 🖥️ PC (navigateur) | Documents projet, besoins, résultats d'analyse |
-| **Décideur** (MOA propriétaire des données ; éventuellement un responsable technique selon l'organisation) | Valide le contexte métier figé (phase 2), revoit les propositions (dossier de revue), les valide ou les refuse avec motif, déclenche la génération de l'UPDATE | 🖥️ PC (navigateur) | Dossier de revue, validations (par défaut auto-validation interdite) |
+| **Décideur** (MOA propriétaire des données ; éventuellement un responsable technique selon l'organisation) | Valide le contexte métier figé (phase 2), revoit les propositions (dossier de revue), les valide ou les refuse avec motif, déclenche la génération de l'UPDATE | 🖥️ PC (navigateur) | Dossier de revue, validations (défaut : 1 validation, auto-validation interdite) |
 | **Administrateur** (équipe technique / exploitation) | Comptes et rôles, connexion BDD, paramétrage du circuit de validation, arrêt d'urgence ; MFA obligatoire ; pas d'usage quotidien | 🖥️ PC (navigateur) | Paramètres du circuit, actions d'administration |
-| **Reverse proxy** | TLS, headers de sécurité (CSP…), authentification OIDC devant l'UI et l'API | 🐳 Serveur Yasna | Requêtes HTTP |
+| **Reverse proxy** | TLS, headers de sécurité (CSP…), authentification **OIDC générique** devant l'UI et l'API | 🐳 Serveur Yasna | Requêtes HTTP |
 | **UI Streamlit** | Chat, visualisations (suggestions, résultats, scripts), formulaires de validation | 🐳 Serveur Yasna (conteneur UI) | Données d'affichage uniquement |
 | **API FastAPI** | Point d'entrée unique, auth + rôles (opérationnel, décideur, administrateur), validation stricte des entrées, refus des actions hors séquence | 🐳 Serveur Yasna | Requêtes, métadonnées |
 | **Orchestrateur (machine à états)** | Déroulé des 8 phases imposé par le code, circuit de validation paramétrable, arrêt d'urgence, journalisation | 🐳 Serveur Yasna | États du projet, identifiant + hash du SELECT validé |

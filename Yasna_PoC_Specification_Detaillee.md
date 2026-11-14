@@ -30,7 +30,7 @@ L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le comb
 | Analyse | Suggestions de manques (transformables en besoin) + pipeline simplifié (SELECT) | Cartographie métier↔technique dédiée |
 | Modifications | UPDATE + rollback générés **après validation du dossier de revue** par le ou les Décideur(s), jamais exécutés automatiquement ; l'UPDATE réutilise la clause WHERE du SELECT validé (SET seulement généré par le LLM) ; triggers impactés classés réversibles / non réversibles ; contrôle de dérive embarqué ; rollback testable | Exécution automatique ; refonte de schéma (3NF) |
 | Gouvernance | **Circuit de validation paramétrable par projet** (défaut : 1 validation par un Décideur, auto-validation interdite) + dossier de revue + journalisation | Homologation complète |
-| Interface | Streamlit derrière **reverse proxy** (TLS, headers de sécurité) + authentification **OIDC** | Interface avancée |
+| Interface | Streamlit derrière **reverse proxy nginx** (TLS, headers de sécurité) + authentification **OIDC générique** (PoC : Keycloak en conteneur) | Interface avancée |
 | IA | **API externe configurable par défaut** (Mistral, données fictives uniquement) ; mode local optionnel | Fine-tuning |
 | Déploiement | Docker Compose basique | Production hardened |
 
@@ -165,7 +165,7 @@ Besoins piégés qui doivent **tous être bloqués** :
 - Pipeline multi-agents complet (4 agents) tel que décrit au Document Projet.
 - Cartographie métier↔technique dédiée et proposition de schéma optimisé (3NF) — reportées post-PoC.
 - Amélioration du RAG métier (chunking pour les fenêtres de contexte).
-- Renforcement de la sécurité (homologation, audit trail, conteneurisation plus stricte, OIDC en production).
+- Renforcement de la sécurité (homologation, audit trail, conteneurisation plus stricte, OIDC générique en production : IdP de l'administration ou ProConnect).
 - Packaging Docker plus abouti.
 - Tests automatisés (fonctionnels + sécurité).
 
