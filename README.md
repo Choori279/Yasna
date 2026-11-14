@@ -11,13 +11,13 @@ Outil d'analyse et de nettoyage intelligent de bases de données pour les **gran
 
 ## Principes clés
 
-- **API externe configurable par défaut** (fournisseur souverain), mode local **optionnel** : couche fournisseur LLM interchangeable via variables d'environnement (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_PROVIDER_SECNUMCLOUD`), aucune modification de code pour changer de fournisseur ; jamais de clés en dur
+- **API externe configurable par défaut** (fournisseur souverain), mode local **optionnel** : couche fournisseur LLM interchangeable via variables d'environnement (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL_CADRAGE`, `LLM_MODEL_SQL`, `LLM_MODEL_EMBEDDING`, `LLM_PROVIDER_SECNUMCLOUD`), aucune modification de code pour changer de fournisseur ; jamais de clés en dur ; un **modèle par tâche** (PoC : Mistral Large 4 par défaut)
 - Le LLM ne reçoit **que** le schéma, les objets SQL et des **statistiques agrégées** — jamais de lignes brutes ; pseudonymisation obligatoire si des exemples de lignes sont nécessaires
 - Connexion BDD **lecture seule** avec contrôles **déterministes** (GRANT limités, `sqlglot`, `EXPLAIN`, `LIMIT`, `statement_timeout`) ; aucun script de modification exécuté automatiquement
 - **Circuit de validation paramétrable par projet**, reproduisant le processus de validation réel de l'organisation (par défaut : 1 validation par un Décideur, auto-validation interdite) ; le LLM ne génère que la partie SET, la clause WHERE du SELECT validé est réutilisée par le code ; les scripts sont générés après validation, jamais exécutés par Yasna, avec **rollback systématique**
 - Conformité CNIL / RGPD / ANSSI : minimisation des données, journal d'audit en ajout seul (append-only, chaîné par hash), **arrêt d'urgence**, conteneurs non-root sécurisés
-- Exposition sécurisée : **reverse proxy** (TLS, headers de sécurité) devant l'UI et l'API + authentification **OIDC** (ex. ProConnect)
+- Exposition sécurisée : **reverse proxy nginx** (TLS, headers de sécurité) devant l'UI et l'API + authentification **OIDC générique** (aucun fournisseur codé en dur ; PoC : Keycloak en conteneur ; production : fournisseur d'identité de l'administration ou ProConnect)
 
 ## Licence
 
-`À COMPLÉTER : choix de la licence` (logiciel libre encouragé par la DINUM — décision à prendre par le porteur de projet).
+**EUPL-1.2** (Licence publique de l'Union européenne, version 1.2) — voir le fichier [LICENSE](LICENSE) ; texte officiel en français publié sur interoperable-europe.ec.europa.eu.

@@ -15,9 +15,9 @@ Démontrer concrètement la valeur de Yasna sur un **périmètre réduit et réa
 
 L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le combo « compréhension métier + analyse technique + propositions sécurisées », avec une **action et un attendu clairs à chaque phase**.
 
-**Stratégie IA du PoC** : **API externe configurable par défaut** (fournisseur souverain). Le PoC utilise l'API Mistral standard, **autorisée uniquement parce que les données du PoC sont fictives** (jeu de test + CDC PARINDIE). La couche fournisseur LLM est interchangeable sans modification de code (`LLM_BASE_URL`, `LLM_API_KEY` en `SecretStr`, `LLM_MODEL`, `LLM_PROVIDER_SECNUMCLOUD`) : en production, tout envoi de données sensibles exige un fournisseur **qualifié SecNumCloud** (sur le service d'IA utilisé), sinon l'envoi est bloqué par le code. Le mode local (Ollama) reste **optionnel**.
+**Stratégie IA du PoC** : **API externe configurable par défaut** (fournisseur souverain). Le PoC utilise l'API Mistral standard, **autorisée uniquement parce que les données du PoC sont fictives** (jeu de test + CDC PARINDIE). La couche fournisseur LLM est interchangeable sans modification de code (`LLM_BASE_URL`, `LLM_API_KEY` en `SecretStr`, `LLM_MODEL_CADRAGE`, `LLM_MODEL_SQL`, `LLM_MODEL_EMBEDDING`, `LLM_PROVIDER_SECNUMCLOUD`) : **un modèle par tâche** ; **PoC : Mistral Large 4 par défaut**. En production, tout envoi de données sensibles exige un fournisseur **qualifié SecNumCloud** (sur le service d'IA utilisé), sinon l'envoi est bloqué par le code. Le mode local (Ollama) reste **optionnel**.
 
-**Règle de minimisation (données envoyées au LLM)** : par défaut, le LLM ne reçoit que le schéma, les objets SQL et des **statistiques agrégées** (comptages, taux de NULL, distributions, formats détectés), **jamais de lignes brutes**. Si des exemples de lignes sont nécessaires : **pseudonymisation obligatoire** avant envoi (colonnes identifiantes masquées ou remplacées). L'échantillon extrait n'est pas persisté au-delà de la session d'analyse (`À COMPLÉTER : durée de conservation si chiffré`).
+**Règle de minimisation (données envoyées au LLM)** : par défaut, le LLM ne reçoit que le schéma, les objets SQL et des **statistiques agrégées** (comptages, taux de NULL, distributions, formats détectés), **jamais de lignes brutes**. Si des exemples de lignes sont nécessaires : **pseudonymisation obligatoire** avant envoi (colonnes identifiantes masquées ou remplacées). L'échantillon extrait : **aucune persistance** après la session d'analyse.
 
 ## Périmètre du PoC
 
@@ -83,7 +83,7 @@ L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le comb
 
 ### Phase 7 – Traitement multi-agents (analyse en SELECT)
 
-**Pipeline simplifié du PoC** (l'Agent 1 est une simple recherche dans la base de connaissances, sans LLM ; les Agents 3 et 4 se recoupent) :
+**Pipeline simplifié confirmé** (5 étapes, **2 appels LLM** : génération du SELECT et explication/revue) : l'Agent 1 est une simple recherche dans la base de connaissances, sans LLM ; les Agents 3 et 4 se recoupent :
 
 1. **Récupération des règles de gestion** (code — recherche RAG dans la base de connaissances).
 2. **Génération du SELECT** (LLM, à partir du schéma, des objets SQL et des statistiques agrégées).
@@ -92,6 +92,8 @@ L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le comb
 5. **Explication et revue des résultats au regard des règles** (LLM — statistiques agrégées uniquement, lignes pseudonymisées si nécessaires).
 
 *Le pipeline 4 agents complet (Agents 1 à 4 du Document Projet) reste la **cible post-PoC**.*
+
+**Banc de comparaison pour la génération SQL** : la génération SQL est comparée entre **Mistral Large 4** (défaut), **Medium 3.5** et **Codestral**, sur le jeu de données à anomalies injectées (taux de détection et taux de fausses alertes — cf. critères de succès).
 
 **Livrable** : requête SELECT validée et journalisée (identifiant + hash) + statistiques + explications + revue.
 
@@ -104,9 +106,9 @@ Après la phase 7 : SELECT OK sur l'échantillon → **proposition transmise au(
 - Proposition **validée** → génération de :
   - le **script SQL de modification** : le code réutilise **la clause WHERE du SELECT validé** (analyse sqlglot) — le LLM ne génère que la **partie SET**, et le vérifie par le code (même périmètre) ; commentaires explicatifs, **liste des triggers impactés / effets de bord classés en « réversibles par le rollback » / « non réversibles »** (avec description de l'effet ; un effet non réversible est signalé explicitement dans le dossier de revue) ;
   - le **script de rollback testable** (transaction + sauvegarde préalable : table de backup **créée dans la même transaction** que l'UPDATE).
-- Chaque script UPDATE embarque un **contrôle de dérive des données** : recomptage des lignes ciblées en tête de script, **annulation de la transaction** si le nombre diffère au-delà d'une tolérance paramétrable par projet.
+- Chaque script UPDATE embarque un **contrôle de dérive des données** : recomptage des lignes ciblées en tête de script, **annulation de la transaction** si le nombre diffère au-delà d'une tolérance **paramétrable par projet, par défaut 0** — tout écart de comptage annule la transaction.
 - Chaque script porte un **en-tête** indiquant les valideurs, l'horodatage, le **hash du SELECT validé** et la mention **« Exécution hors Yasna, sous la responsabilité de l'exécutant »**. Yasna s'arrête à la **génération du script** : aucune validation après génération.
-- La table de backup contient des données personnelles : durée de conservation et suppression à prévoir (`À COMPLÉTER`).
+- La table de backup contient des données personnelles : durée de conservation et suppression à prévoir (`TODO(RGPD) : à valider par le DPO`).
 - Proposition **refusée avec motif** → retour à l'Opérationnel (retour au besoin, phase 6).
 - **Dossier de changement** : Yasna produit un dossier prêt à déposer dans le processus de changement de l'administration, pas seulement un script :
   - les scripts **UPDATE + rollback** (avec l'en-tête défini ci-dessus) ;
@@ -145,7 +147,9 @@ Besoins piégés qui doivent **tous être bloqués** :
 - [ ] Les liens entre règles de gestion et éléments BDD (dont triggers si présents) sont établis.
 - [ ] La première analyse produit des suggestions de manques expliquées, transformables en besoin (aucune action).
 - [ ] Le pipeline simplifié produit une requête SELECT bornée, **validée par les contrôles déterministes** (sqlglot + EXPLAIN), avec résultats confirmés et revue au regard des règles.
-- [ ] **Taux de détection des anomalies injectées** : `À COMPLÉTER` (ex. ≥ 80 %) par rapport à la liste de référence.
+- [ ] **Taux de détection des anomalies injectées** (anomalies injectées trouvées / anomalies injectées) : **≥ 80 %** par rapport à la liste de référence.
+- [ ] **Taux de fausses alertes** : `À COMPLÉTER`.
+- [ ] Temps entre l'expression du besoin et le script validé, comparé à la méthode actuelle (`À COMPLÉTER : référence`).
 - [ ] **0 requête hors périmètre exécutée** (table, colonnes, types d'instruction).
 - [ ] **100 % des requêtes malveillantes du jeu de tests de sécurité rejetées** par le contrôle sqlglot (chaque refus journalisé avec son motif).
 - [ ] Après validation du dossier de revue par le circuit paramétré, les scripts UPDATE + rollback (testable) sont générés, avec estimation d'impact, triggers impactés classés réversibles / non réversibles, et **contrôle de dérive embarqué** ; **100 % des scripts** comportent le contrôle de dérive, un rollback testable et un **en-tête** (valideurs, horodatage, hash du SELECT validé, mention « Exécution hors Yasna, sous la responsabilité de l'exécutant »).

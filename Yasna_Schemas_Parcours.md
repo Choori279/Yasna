@@ -21,7 +21,7 @@ flowchart LR
     DOCS["Documents projet<br/>circulaires, SFD, STD, DEX…"]
 
     subgraph YASNA["🐳 Serveur Yasna (Docker, réseau isolé, non-root)"]
-        PROXY["Reverse proxy (Caddy/nginx)<br/>TLS + headers de sécurité + OIDC"]
+        PROXY["Reverse proxy (nginx)<br/>TLS + headers de sécurité + OIDC générique"]
         API["API FastAPI<br/>auth, rôles (opérationnel, décideur,<br/>administrateur), validation des entrées"]
         ORCH["Orchestrateur (machine à états)<br/>déroulé des 8 phases, refus hors séquence,<br/>arrêt d'urgence, circuit de validation paramétrable"]
         RAG["Base de connaissances du projet<br/>RAG : contexte figé + règles de gestion"]
@@ -263,10 +263,10 @@ flowchart TD
 - La BDD n'est jamais modifiée par Yasna : connexion **lecture seule** (rôle PostgreSQL dédié, `GRANT SELECT` limités au périmètre, `default_transaction_read_only`, `statement_timeout`), requêtes SELECT **contrôlées de façon déterministe** (sqlglot : une seule instruction, SELECT uniquement, tables/colonnes autorisées, LIMIT imposé ; EXPLAIN sous seuil de coût) puis **bornées** (LIMIT/timeout), et les scripts UPDATE/rollback sont **téléchargés puis exécutés manuellement hors Yasna**, après **validation du dossier de revue par le ou les Décideur(s)** (circuit de validation paramétrable par projet).
 - L'ordre des phases est imposé par une **machine à états** (diagramme 2) : l'API refuse toute action hors séquence ; l'UPDATE exige un SELECT validé et journalisé (identifiant + hash, même périmètre).
 - **Minimisation des données envoyées au LLM** : schéma, objets SQL et statistiques agrégées uniquement ; jamais de lignes brutes ; **pseudonymisation obligatoire** si des exemples sont nécessaires ; en production, fournisseur **qualifié SecNumCloud** requis pour les données sensibles (sinon envoi bloqué par le code, drapeau `LLM_PROVIDER_SECNUMCLOUD`).
-- L'IA est une **couche fournisseur interchangeable** : **API externe configurable par défaut** (fournisseur souverain), **mode local optionnel** ; clés jamais en dur (variables d'environnement `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_PROVIDER_SECNUMCLOUD`).
+- L'IA est une **couche fournisseur interchangeable** : **API externe configurable par défaut** (fournisseur souverain), **mode local optionnel** ; clés jamais en dur (variables d'environnement `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL_CADRAGE`, `LLM_MODEL_SQL`, `LLM_MODEL_EMBEDDING`, `LLM_PROVIDER_SECNUMCLOUD`).
 - **Arrêt d'urgence** : un administrateur peut couper immédiatement les appels LLM et la connexion BDD (journalisé).
 - **Journal d'audit append-only, chaîné par hash** : accès, validations, scripts générés, refus — sans données sensibles en clair dans les logs.
-- **Exposition sécurisée** : reverse proxy (TLS, headers de sécurité) + authentification **OIDC** devant l'UI et l'API ; rôles gérés côté API.
+- **Exposition sécurisée** : reverse proxy nginx (TLS, headers de sécurité) + authentification **OIDC générique** (aucun fournisseur codé en dur ; PoC : Keycloak en conteneur) devant l'UI et l'API ; rôles gérés côté API.
 - Le **chat de cadrage** n'accepte que des documents projet non personnels (circulaires, SFD, STD, DEX…) : aucune donnée de bénéficiaires ; tout contenu des documents et de la BDD est traité comme **non fiable** (aucune instruction issue de ces contenus n'est suivie).
 - Conteneurs **non-root, capabilities droppées, réseau isolé** ; scripts générés avec **triggers impactés classés réversibles / non réversibles**, **contrôle de dérive** et **rollback testable** (transaction + sauvegarde préalable dans la même transaction).
 

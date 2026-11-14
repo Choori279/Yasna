@@ -73,7 +73,7 @@ Yasna est un outil intelligent, simple et pensé pour le secteur public. Il comb
    - **Agent 4** : revue globale et communication des résultats à l'utilisateur.
 
 8. **Revue décisionnelle puis génération des scripts (UPDATE + rollback)**  
-   Après la phase 7 : SELECT OK sur l'échantillon → **proposition transmise au(x) Décideur(s)** → revue (cf. section 6, « Rôles et circuit de validation ») → **validée** (génération du script UPDATE + rollback) ou **refusée avec motif** (retour à l'Opérationnel). Le **dossier de revue** comprend : besoin, SELECT validé et journalisé (identifiant + hash, **exactement le même périmètre**), **COUNT total des lignes concernées**, extrait d'échantillon, modification envisagée en langage clair, **triggers concernés**. Proposition **validée** : le code réutilise **la clause WHERE du SELECT validé** (sqlglot) — le LLM ne génère que la **partie SET**, vérification par le code — et produit le **script SQL de modification** (explications, estimation des lignes impactées, **liste des triggers impactés / effets de bord** classés **réversibles par le rollback** / **non réversibles**) ainsi que le **script de rollback testable** (transaction + sauvegarde préalable : table de backup créée **dans la même transaction** que l'UPDATE). Chaque script UPDATE embarque un **contrôle de dérive des données** (recomptage des lignes ciblées en tête de script ; annulation de la transaction si le nombre diffère au-delà d'une tolérance paramétrable par projet). Chaque script porte un **en-tête** (valideurs, horodatage, hash du SELECT validé, mention « Exécution hors Yasna, sous la responsabilité de l'exécutant ») ; **Yasna s'arrête à la génération du script**.
+   Après la phase 7 : SELECT OK sur l'échantillon → **proposition transmise au(x) Décideur(s)** → revue (cf. section 6, « Rôles et circuit de validation ») → **validée** (génération du script UPDATE + rollback) ou **refusée avec motif** (retour à l'Opérationnel). Le **dossier de revue** comprend : besoin, SELECT validé et journalisé (identifiant + hash, **exactement le même périmètre**), **COUNT total des lignes concernées**, extrait d'échantillon, modification envisagée en langage clair, **triggers concernés**. Proposition **validée** : le code réutilise **la clause WHERE du SELECT validé** (sqlglot) — le LLM ne génère que la **partie SET**, vérification par le code — et produit le **script SQL de modification** (explications, estimation des lignes impactées, **liste des triggers impactés / effets de bord** classés **réversibles par le rollback** / **non réversibles**) ainsi que le **script de rollback testable** (transaction + sauvegarde préalable : table de backup créée **dans la même transaction** que l'UPDATE). Chaque script UPDATE embarque un **contrôle de dérive des données** (recomptage des lignes ciblées en tête de script ; annulation de la transaction si le nombre diffère au-delà d'une tolérance **paramétrable par projet, par défaut 0** — tout écart de comptage annule la transaction). Chaque script porte un **en-tête** (valideurs, horodatage, hash du SELECT validé, mention « Exécution hors Yasna, sous la responsabilité de l'exécutant ») ; **Yasna s'arrête à la génération du script**.
 
    La phase 8 livre un **dossier de changement** prêt à déposer dans le processus de l'administration, pas seulement un script : les scripts UPDATE + rollback (avec l'en-tête ci-dessus) et la **fiche de changement** (besoin, périmètre, COUNT des lignes, triggers et effets de bord, **procédure d'exécution**, **procédure de retour arrière**, **tests à passer en recette avant mise en production**). L'exécution reste **hors Yasna**, par l'exploitation de l'administration, selon son **propre processus de changement**.
 
@@ -83,7 +83,7 @@ Yasna est un outil intelligent, simple et pensé pour le secteur public. Il comb
 
 **Valeur ajoutée :**
 - Parcours guidé avec une action et un attendu clairs à chaque phase (cadrage, validation du contexte, analyse, spécification, revue décisionnelle).
-- Réduction forte des délais (de plusieurs mois à quelques semaines).
+- Accélération de l'analyse et de la production des scripts ; gain à mesurer pendant le PoC.
 - Allègement de la charge des experts techniques et métier.
 - Préparation réelle des données pour une IA utile.
 - Outil léger et abordable, conçu pour les grandes administrations et organismes publics.
@@ -154,7 +154,7 @@ Yasna doit respecter les exigences du secteur public français :
 - Par défaut, le LLM ne reçoit **que** le schéma, les objets SQL et des **statistiques agrégées** (comptages, taux de NULL, distributions, formats détectés), **jamais de lignes brutes**.
 - Si des exemples de lignes sont nécessaires : **pseudonymisation obligatoire** avant envoi (colonnes identifiantes masquées ou remplacées).
 - En production, si des données sensibles doivent être envoyées au LLM : le fournisseur configuré doit être **qualifié SecNumCloud** (sur le service d'IA utilisé, pas seulement l'infrastructure) ; à défaut, **l'envoi est bloqué par le code** (drapeau `LLM_PROVIDER_SECNUMCLOUD`). La minimisation reste obligatoire même chez un fournisseur qualifié.
-- L'échantillon extrait n'est pas persisté sur le serveur Yasna au-delà de la session d'analyse (ou alors chiffré, avec une durée de conservation définie : `À COMPLÉTER : durée de conservation de l'échantillon`).
+- Échantillon : **aucune persistance** au-delà de la session d'analyse.
 
 ### Contenus non fiables (anti-injection)
 
@@ -167,7 +167,7 @@ Conformément au principe ANSSI « autorisations indépendantes du modèle », c
 - Rôle PostgreSQL avec des `GRANT SELECT` limités à la table et aux colonnes du périmètre du projet.
 - Paramètres côté rôle : `default_transaction_read_only = on` et `statement_timeout` défini.
 - Analyse syntaxique avec `sqlglot` avant exécution : **une seule instruction**, uniquement `SELECT`, uniquement des tables/colonnes autorisées, `LIMIT` imposé, pas de fonctions système.
-- `EXPLAIN` préalable : refus si le coût estimé dépasse un seuil configurable.
+- `EXPLAIN` préalable : refus si le coût estimé dépasse un seuil **paramétrable** (`À COMPLÉTER : valeur par défaut à calibrer pendant le PoC`).
 - Toute requête refusée est **journalisée avec le motif du refus**.
 
 ### Arrêt d'urgence
@@ -176,25 +176,25 @@ Un **arrêt d'urgence** (action d'un administrateur) coupe immédiatement les ap
 
 ### Intégrité du journal d'audit
 
-Le journal d'audit est en **ajout seul (append-only)**, avec entrées **chaînées par hash** pour empêcher toute modification après coup. Durée de conservation : `À COMPLÉTER`.
+Le journal d'audit est en **ajout seul (append-only)**, avec entrées **chaînées par hash** pour empêcher toute modification après coup. **Durées de conservation** : toutes **paramétrables**, valeur fixée par le **responsable de traitement ou son DPO** (RET-01) ; valeur par défaut pour le journal d'audit : **6 mois à 1 an** (repère CNIL, RET-07).
 
 ### Authentification et exposition de l'UI
 
-Streamlit n'offre pas d'authentification robuste et gère mal les headers de sécurité : un **reverse proxy** (Caddy ou nginx) est placé devant l'UI et l'API, chargé du **TLS** et des **headers de sécurité** (CSP, etc.), avec une authentification **OIDC** (ProConnect envisageable pour les agents publics, sinon l'annuaire de l'administration). Les rôles (**opérationnel, décideur, administrateur**) sont gérés côté API.
+Streamlit n'offre pas d'authentification robuste et gère mal les headers de sécurité : un **reverse proxy nginx** est placé devant l'UI et l'API, chargé du **TLS** et des **headers de sécurité** (CSP, etc.), avec une authentification **OIDC générique** (aucun fournisseur codé en dur) : PoC — **Keycloak** en conteneur ; production — fournisseur d'identité de l'administration ou **ProConnect**. Les rôles (**opérationnel, décideur, administrateur**) sont gérés côté API.
 
 ### Bases de données supportées
 
 **PoC : PostgreSQL uniquement.** Les SI legacy des administrations tournent souvent sur Oracle, DB2 ou SQL Server : l'architecture prévoit une **interface d'adaptateur** par SGBD (extraction du schéma et des triggers, dialecte sqlglot) pour les versions suivantes. **Feuille de route** : l'adaptateur pour un **SGBD legacy (DB2 / Oracle) est la priorité n° 1 après le PoC** — SGBD prioritaire : `À COMPLÉTER`. Tout code spécifique à PostgreSQL reste dans `db_adapters/postgresql`, jamais ailleurs.
 
-### Modèle cible
+### Modèles
 
-`À COMPLÉTER : modèle cible du PoC` (via l'API Mistral) et sa fenêtre de contexte. Le mode local est **optionnel** : les considérations matérielles (GPU, RAM) sont traitées dans la section « Déploiement local (optionnel) » ci-dessous.
+Un **modèle par tâche** : `LLM_MODEL_CADRAGE`, `LLM_MODEL_SQL`, `LLM_MODEL_EMBEDDING` — configurés par variables d'environnement (API Mistral). **PoC : Mistral Large 4 par défaut.** En production, chaque modèle doit être **disponible sur l'offre SecNumCloud retenue**. Fenêtre de contexte : à relever dans la documentation Mistral du modèle retenu. Le mode local est **optionnel** : les considérations matérielles (GPU, RAM) sont traitées dans la section « Déploiement local (optionnel) » ci-dessous.
 
 **Déploiement local (optionnel)** — pour un fonctionnement 100 % local, prévoir le matériel dédié (GPU, RAM) adapté au modèle retenu et à sa fenêtre de contexte ; `À COMPLÉTER : configuration matérielle de référence`.
 
 ### RGPD et sous-traitance (API externe)
 
-L'administration reste **responsable du traitement** ; le fournisseur LLM est **sous-traitant** (article 28 du RGPD) : contrat de sous-traitance, localisation des données, non-réutilisation des prompts pour l'entraînement, durée de conservation des logs du fournisseur : `À COMPLÉTER`. La responsabilité est **partagée, elle n'est pas transférée** au fournisseur.
+L'administration reste **responsable du traitement** ; le fournisseur LLM est **sous-traitant** (article 28 du RGPD) : contrat de sous-traitance, localisation des données, non-réutilisation des prompts pour l'entraînement, durée de conservation des logs du fournisseur : `TODO(RGPD) : à valider par le DPO`. La responsabilité est **partagée, elle n'est pas transférée** au fournisseur.
 
 Pour les administrations de l'État, leurs opérateurs (article 31 de la loi SREN n° 2024-449 et son décret d'application d'avril 2026) et, selon l'évolution du texte en cours, les collectivités de plus de 30 000 habitants : un fournisseur **qualifié SecNumCloud** est requis pour les données sensibles. Vérifier que la qualification porte bien sur le **service d'IA utilisé**, pas seulement sur l'infrastructure.
 
@@ -211,7 +211,7 @@ Pour les administrations de l'État, leurs opérateurs (article 31 de la loi SRE
 - Pas de secrets en dur, validation stricte des entrées, headers de sécurité (via reverse proxy).
 - **Chat de cadrage** : seuls des documents projet non personnels (circulaires, SFD, STD, DEX…) y sont chargés ; ces documents transitent vers le fournisseur du LLM configuré. Aucune donnée personnelle (bénéficiaires…) ne doit y être saisie.
 - **Connexion BDD** : rôle PostgreSQL strictement lecture seule à l'analyse ; requêtes SELECT bornées (LIMIT / échantillonnage, timeout) et contrôlées de façon déterministe (cf. ci-dessus).
-- **Effets de bord SQL** : tout script de modification généré doit lister les triggers/contraintes impactés, classés en **réversibles par le rollback** / **non réversibles** (avec description de l'effet) ; un effet non réversible est signalé explicitement dans le dossier de revue. Le rollback doit être testable (transaction + sauvegarde préalable dans la même transaction que l'UPDATE). La table de backup contient des données personnelles : durée de conservation et suppression à prévoir (`À COMPLÉTER`).
+- **Effets de bord SQL** : tout script de modification généré doit lister les triggers/contraintes impactés, classés en **réversibles par le rollback** / **non réversibles** (avec description de l'effet) ; un effet non réversible est signalé explicitement dans le dossier de revue. Le rollback doit être testable (transaction + sauvegarde préalable dans la même transaction que l'UPDATE). La table de backup contient des données personnelles : durée de conservation et suppression à prévoir (`TODO(RGPD) : à valider par le DPO`).
 
 ## 7. Chemin vers la production
 
@@ -238,11 +238,11 @@ Ce kit figure parmi les **livrables de la feuille de route** (cf. section 9).
 ## 8. Stack technique et architecture
 
 - **Backend** : Python 3.12+ + FastAPI  
-- **Interface** : Streamlit derrière un **reverse proxy** (Caddy ou nginx : TLS, headers de sécurité)  
-- **Authentification** : **OIDC** (ex. ProConnect pour les agents publics, sinon annuaire de l'administration) ; rôles gérés côté API  
+- **Interface** : Streamlit derrière un **reverse proxy nginx** (TLS, headers de sécurité)  
+- **Authentification** : **OIDC générique** (aucun fournisseur codé en dur ; PoC : Keycloak en conteneur ; production : fournisseur d'identité de l'administration ou ProConnect) ; rôles gérés côté API  
 - **Base de données** : PostgreSQL (PoC) ; interface d'adaptateur par SGBD (Oracle, DB2, SQL Server…) prévue pour les versions suivantes  
 - **ORM** : SQLAlchemy 2.0  
-- **IA** : **couche fournisseur LLM interchangeable**, configurée uniquement par variables d'environnement (`LLM_BASE_URL`, `LLM_API_KEY` en `SecretStr`, `LLM_MODEL`, `LLM_PROVIDER_SECNUMCLOUD=true/false`), via une API compatible OpenAI. Passer de l'API Mistral à une offre SecNumCloud ou à un modèle local (Ollama) ne doit demander **aucune modification de code**.  
+- **IA** : **couche fournisseur LLM interchangeable**, configurée uniquement par variables d'environnement (`LLM_BASE_URL`, `LLM_API_KEY` en `SecretStr`, `LLM_MODEL_CADRAGE`, `LLM_MODEL_SQL`, `LLM_MODEL_EMBEDDING`, `LLM_PROVIDER_SECNUMCLOUD=true/false`), via une API compatible OpenAI. Passer de l'API Mistral à une offre SecNumCloud ou à un modèle local (Ollama) ne doit demander **aucune modification de code**.  
 - **Contrôle SQL** : `sqlglot` (analyse syntaxique) + `EXPLAIN` (seuil de coût) avant toute exécution  
 - **Conteneurisation** : Docker + Docker Compose sécurisé (non-root, capabilities droppées)  
 - **Tests** : pytest + bandit + Trivy  
@@ -266,7 +266,7 @@ Structure modulaire recommandée : `core` / `rag` / `analysis` / `sql_generator`
 **Objectif du PoC**  
 Démontrer la valeur de Yasna sur un périmètre réaliste et maîtrisable : **une table métier prioritaire** (exemple : table des bénéficiaires d'aides sociales), en déroulant le **parcours complet** : cadrage par la documentation projet + chat IA, initialisation du projet (avec validation du contexte figé par le Décideur et paramétrage du circuit de validation par l'Administrateur), connexion lecture seule, lien contexte métier ↔ BDD (y compris objets SQL), première analyse en suggestions, spécification du besoin, pipeline multi-agents (SELECT), puis proposition transmise au(x) Décideur(s), revue et génération des scripts UPDATE + rollback sur validation.  
 
-Pour le PoC, le pipeline multi-agents est **simplifié** (cf. spécification détaillée du PoC) ; le pipeline 4 agents complet reste la **cible post-PoC**.  
+Pour le PoC, le pipeline est **simplifié et confirmé : 5 étapes, 2 appels LLM** (cf. spécification détaillée du PoC) ; le pipeline 4 agents complet reste la **cible post-PoC**.  
 
 Le PoC utilise une **API externe (Mistral), autorisée uniquement parce que les données du PoC sont fictives** (jeu de test + CDC PARINDIE).  
 
