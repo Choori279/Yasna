@@ -56,7 +56,8 @@ Objectif : liste des références officielles à avoir en visibilité pendant le
 - [ ] Dépendances épinglées (versions fixées) et justifiées dans la PR
 - [ ] Journalisation/audit : accès, revues et validations du circuit décisionnel, scripts générés, refus de requêtes — journal **append-only, entrées chaînées par hash** ; durée de conservation : `À COMPLÉTER` ; **sans données sensibles en clair** dans les logs
 - [ ] Connexion BDD : rôle PostgreSQL **lecture seule** dédié (`GRANT SELECT` limités au périmètre, `default_transaction_read_only`, `statement_timeout`), requêtes SELECT bornées (LIMIT/timeout) et contrôlées (sqlglot + EXPLAIN), jamais d'exécution automatique de scripts de modification
-- [ ] PoC : PostgreSQL uniquement ; interface d'adaptateur par SGBD (Oracle, DB2, SQL Server) prévue pour les versions suivantes
+- [ ] PoC : PostgreSQL uniquement ; interface d'adaptateur par SGBD (Oracle, DB2, SQL Server) prévue pour les versions suivantes — **adaptateur SGBD legacy (DB2 / Oracle) en priorité n° 1 après le PoC** (SGBD prioritaire : `À COMPLÉTER`)
+- [ ] **Code spécifique à PostgreSQL confiné dans `db_adapters/postgresql`, jamais ailleurs** : les autres modules passent exclusivement par l'interface d'adaptateur (extraction schéma/triggers, dialecte sqlglot)
 - [ ] Circuit de validation paramétrable par projet : reproduit le processus de validation réel de l'organisation (nombre de validations distinctes — 1 ou 2 ; rôle ou profil exigé pour chaque validation ; auto-validation autorisée ou interdite) ; valeurs par défaut : 1 validation par un Décideur, auto-validation **interdite** ; paramétrage par l'Administrateur à l'initialisation du projet, toute modification réservée à l'Administrateur et journalisée ; chaque validation horodatée, nominative et journalisée
 
 ---

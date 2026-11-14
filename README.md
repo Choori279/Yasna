@@ -1,6 +1,6 @@
 # Yasna
 
-Outil d'analyse et de nettoyage intelligent de bases de données pour les administrations publiques (cas d'usage prioritaire : aides sociales).
+Outil d'analyse et de nettoyage intelligent de bases de données pour les **grandes administrations et organismes publics** disposant d'applications développées en interne et d'équipes techniques (caisses de sécurité sociale, ministères, opérateurs de l'État — cas d'usage : aides sociales).
 
 ## Documentation
 

@@ -22,7 +22,9 @@ Présentation claire et complète du projet Yasna à destination des contributeu
 
 ## 1. Postulat de départ
 
-Les administrations publiques (mairies, départements, préfectures, etc.) gèrent quotidiennement des milliers de dossiers : aides sociales (RSA, allocations), état civil, subventions, inscriptions scolaires…  
+Les grandes administrations et organismes publics (caisses de sécurité sociale, ministères, opérateurs de l'État) gèrent quotidiennement des volumes massifs de dossiers : aides sociales (RSA, allocations), prestations, état civil, subventions, inscriptions scolaires…  
+
+**Cible** : Yasna vise en priorité les **grandes administrations et organismes publics** disposant d'**applications développées en interne** et d'**équipes techniques**. Les **collectivités ne sont pas visées en priorité** : elles utilisent surtout des **progiciels d'éditeurs** dont elles ne maîtrisent pas le schéma, et une modification directe en base peut faire **perdre le support de l'éditeur**.  
 
 Elles s'appuient sur des systèmes d'information souvent anciens (15 à 30 ans). Ces bases legacy contiennent des volumes importants de données, mais de qualité souvent médiocre : doublons, champs vides, incohérences, formats hétérogènes.  
 
@@ -81,7 +83,7 @@ Yasna est un outil intelligent, simple et pensé pour le secteur public. Il comb
 - Réduction forte des délais (de plusieurs mois à quelques semaines).
 - Allègement de la charge des experts techniques et métier.
 - Préparation réelle des données pour une IA utile.
-- Outil léger, abordable et adapté aux collectivités.
+- Outil léger et abordable, conçu pour les grandes administrations et organismes publics.
 
 ## 4. Solutions existantes
 
@@ -109,7 +111,7 @@ En Europe, et particulièrement en France, la demande est soutenue dans le secte
 **Opportunités pour Yasna :**
 - Répondre à un besoin réel et durable des administrations.
 - Se différencier par une approche « métier-first » (compréhension des règles de gestion) + souveraineté configurable (fournisseur qualifié SecNumCloud pour les données sensibles) + génération de scripts sécurisés.
-- Rester léger et adapté aux collectivités.
+- Cibler les grandes administrations et organismes publics (applications développées en interne, équipes techniques en place).
 
 ## 6. Principes de sécurité et conformité
 
@@ -179,7 +181,7 @@ Streamlit n'offre pas d'authentification robuste et gère mal les headers de sé
 
 ### Bases de données supportées
 
-**PoC : PostgreSQL uniquement.** Les SI legacy des administrations tournent souvent sur Oracle, DB2 ou SQL Server : l'architecture prévoit une **interface d'adaptateur** par SGBD (extraction du schéma et des triggers, dialecte sqlglot) pour les versions suivantes.
+**PoC : PostgreSQL uniquement.** Les SI legacy des administrations tournent souvent sur Oracle, DB2 ou SQL Server : l'architecture prévoit une **interface d'adaptateur** par SGBD (extraction du schéma et des triggers, dialecte sqlglot) pour les versions suivantes. **Feuille de route** : l'adaptateur pour un **SGBD legacy (DB2 / Oracle) est la priorité n° 1 après le PoC** — SGBD prioritaire : `À COMPLÉTER`. Tout code spécifique à PostgreSQL reste dans `db_adapters/postgresql`, jamais ailleurs.
 
 ### Modèle cible
 
@@ -248,7 +250,7 @@ La cartographie métier↔technique dédiée et la proposition de schéma optimi
 Voir le document dédié « PoC Yasna – Spécification détaillée » pour le détail des phases.  
 
 **Suite après le PoC**  
-Stabilisation, extension à d'autres tables et à d'autres SGBD (adaptateurs), pipeline multi-agents complet (4 agents), cartographie dédiée et refonte de schéma (3NF), renforcement de la sécurité/conformité, packaging Docker, amélioration du RAG et de l'audit trail.  
+Stabilisation ; **adaptateur pour un SGBD legacy (DB2 / Oracle) en priorité n° 1** (SGBD prioritaire : `À COMPLÉTER`) ; extension à d'autres tables et à d'autres SGBD (adaptateurs), pipeline multi-agents complet (4 agents), cartographie dédiée et refonte de schéma (3NF), renforcement de la sécurité/conformité, packaging Docker, amélioration du RAG et de l'audit trail.  
 
 ---
 

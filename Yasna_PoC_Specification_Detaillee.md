@@ -152,7 +152,7 @@ Besoins piégés qui doivent **tous être bloqués** :
 
 ## Suite après le PoC
 
-- Extension à d'autres tables et à d'autres SGBD (interface d'adaptateur : Oracle, DB2, SQL Server).
+- **Priorité n° 1 après le PoC** : adaptateur pour un **SGBD legacy (DB2 / Oracle)** — SGBD prioritaire : `À COMPLÉTER` ; puis extension à d'autres tables et à d'autres SGBD (interface d'adaptateur : Oracle, DB2, SQL Server).
 - Pipeline multi-agents complet (4 agents) tel que décrit au Document Projet.
 - Cartographie métier↔technique dédiée et proposition de schéma optimisé (3NF) — reportées post-PoC.
 - Amélioration du RAG métier (chunking pour les fenêtres de contexte).
