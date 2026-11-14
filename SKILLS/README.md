@@ -2,9 +2,11 @@
 
 Récupérés depuis GitHub le 11/11/2026 (dernière version de la branche par défaut).
 
-## Installation
+## Emplacement
 
-Copier le dossier `.claude/` à la racine du projet Yasna. Claude Code détecte automatiquement les skills dans `.claude/skills/`.
+Les skills sont installés directement dans `.claude/skills/` à la racine du dépôt. Claude Code détecte automatiquement les skills dans `.claude/skills/` : **aucune étape de copie n'est nécessaire**.
+
+`plugins/` (insecure-defaults) et `licenses/` ne sont pas des skills : ils sont rangés dans `.claude/vendor/` (respectivement `.claude/vendor/plugins/` et `.claude/vendor/licenses/`).
 
 ## Contenu
 
@@ -26,7 +28,7 @@ Copier le dossier `.claude/` à la racine du projet Yasna. Claude Code détecte 
 
 ## Cas particulier : insecure-defaults
 
-Chez Trail of Bits, `insecure-defaults` n'est plus un skill mais un **plugin** (commande `/audit` + workflow). Il ne fonctionne pas posé dans `.claude/skills/`. Le dossier `plugins/insecure-defaults/` est fourni pour référence ; pour l'utiliser, l'installer via Claude Code :
+Chez Trail of Bits, `insecure-defaults` n'est plus un skill mais un **plugin** (commande `/audit` + workflow). Il ne fonctionne pas posé dans `.claude/skills/`. Le dossier est conservé pour référence dans `.claude/vendor/plugins/insecure-defaults/` ; pour l'utiliser, l'installer via Claude Code :
 
 ```
 /plugin marketplace add trailofbits/skills
@@ -35,9 +37,9 @@ Chez Trail of Bits, `insecure-defaults` n'est plus un skill mais un **plugin** (
 
 ## Ajustements
 
-- Les deux skills addyosmani pointaient vers des checklists partagées à la racine du repo (`../../references/`). Elles ont été copiées dans le dossier `references/` de chaque skill et les chemins corrigés.
+- Les deux skills addyosmani pointaient vers des checklists partagées à la racine du repo (`../../references/`). Elles ont été copiées dans le dossier `references/` de chaque skill et les chemins corrigés. Les dossiers de skill étant déplacés en bloc, les chemins relatifs internes restent valides.
 - Certains skills obra/superpowers mentionnent d'autres skills du même pack (ex. test-driven-development) qui ne sont pas inclus ici.
 
 ## Licences
 
-Voir `licenses/`.
+Voir `.claude/vendor/licenses/`.
