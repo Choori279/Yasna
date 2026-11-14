@@ -56,8 +56,7 @@ LABELS = {
     "publisher_concentration": "Publisher concentration",
     "install_script": "Install-time script execution",
     "downloads": "Download volume",
-    "d
-angerous_workflow": "Dangerous CI workflow",
+    "dangerous_workflow": "Dangerous CI workflow",
     "token_permissions": "CI token permissions",
     "binary_artifacts": "Checked-in binaries",
     "code_review": "Changes reviewed by a second person",
@@ -100,8 +99,7 @@ SCORECARD_CAVEAT = {
         "this measures whether CI workflows declare least-privilege tokens, which tracks "
         "project maturity rather than the likelihood of malicious code being published"
     ),
-   
- "code_review": (
+    "code_review": (
         "this measures the share of recent commits reviewed by a second person, which is "
         "low for most small single-maintainer projects and largely restates publisher "
         "concentration"
@@ -138,8 +136,7 @@ def _safe_code(value: object) -> str:
 
     A code span needs no `[` escaping — a bracket cannot open a link inside one — and a
     backslash written there survives literally, so escaping corrupted the report title
-    and the `Scanned:` path into something no re
-ader could copy. What a code span does
+    and the `Scanned:` path into something no reader could copy. What a code span does
     need is protection from a backtick, which would close the span early and let the
     rest of the value become live Markdown.
 
@@ -184,8 +181,7 @@ def _signal(dep: dict, criterion: str) -> dict:
 
 
 def _flagged(dep: dict, criteria: tuple[str, ...]) -> list[tuple[str, dict]]:
-   
- out = []
+    out = []
     for criterion in criteria:
         signal = _signal(dep, criterion)
         if signal["state"] == State.FLAGGED.value:
@@ -236,8 +232,7 @@ def _version_label(dep: dict) -> str:
 
 
 def _volume(dep: dict) -> str:
-    """Download volume as prioritisation context beside 
-a finding."""
+    """Download volume as prioritisation context beside a finding."""
     value = _signal(dep, "downloads").get("value")
     return f"{value:,}/wk" if isinstance(value, int) else "—"
 
@@ -282,8 +277,7 @@ def findings_section(artifact: dict, criteria: tuple[str, ...], heading: str) ->
             "",
         ),
         (
-            [(d, f)
- for d, f in hits if d.get("dev") is True],
+            [(d, f) for d, f in hits if d.get("dev") is True],
             "Build-time only",
             "Declared as development dependencies. A compromise here reaches build and CI "
             "hosts rather than users of the shipped artifact.",
@@ -329,8 +323,7 @@ def _transitive_summary(transitive: dict) -> str:
     if transitive["flagged"]:
         return (
             f"- **{plural(len(transitive['flagged']), 'transitive package carries', 'transitive packages carry')} "
-     
-       f"known advisories** at the locked versions — see Transitive advisories." + caveat
+            f"known advisories** at the locked versions — see Transitive advisories." + caveat
         )
     if not checkable:
         return (
@@ -376,8 +369,7 @@ def transitive_section(artifact: dict) -> list[str]:
     if not transitive["flagged"]:
         if checkable:
             out += [
-                f"No known advisory affects any of the {checkable}
- registry-verified "
+                f"No known advisory affects any of the {checkable} registry-verified "
                 f"packages beyond the direct set (resolved by {src}), at the locked "
                 f"versions. Only advisories were checked at this depth; every other "
                 f"criterion in this report describes direct dependencies only.",
@@ -421,8 +413,7 @@ def _unverifiable_lines(transitive: dict) -> list[str]:
     if not entries:
         return []
     out = [
-        f"{plural(len(entries), 'entry', 'entries')} in 
-the lockfile could not be "
+        f"{plural(len(entries), 'entry', 'entries')} in the lockfile could not be "
         f"verified against a public registry and "
         f"{'was' if len(entries) == 1 else 'were'} not checked for advisories:",
         "",
@@ -467,7 +458,6 @@ def production_section(artifact: dict) -> list[str]:
     out += [
         f"{plural(len(production), 'dependency', 'dependencies')} "
         f"{'is' if len(production) == 1 else 'are'} declared as runtime dependencies and "
-
         f"ship in the built artifact. Advisory status is given for every one, clean or not.",
         "",
         "| Dependency | Version | Advisories | Other findings |",
@@ -509,8 +499,7 @@ def unassessable_section(artifact: dict) -> list[str]:
             more = f" and {len(names) - 6} more" if len(names) > 6 else ""
             out.append(
                 f"- {plural(len(names), 'dependency', 'dependencies')} — "
-                f"{_safe_text(
-reason)}: {sample}{more}"
+                f"{_safe_text(reason)}: {sample}{more}"
             )
         out.append("")
     return out
@@ -562,7 +551,6 @@ def _download_line(artifact: dict) -> str:
     label = LABELS["downloads"]
     if not counted:
         return f"- **{label}**: not determinable for any dependency in this project."
-
     median = counted[len(counted) // 2][0]
     lowest = ", ".join(f"`{_safe_code(name)}` ({value:,}/wk)" for value, name in counted[:3])
     return (
@@ -610,8 +598,7 @@ def check_no_forged_lines(lines: list[str]) -> None:
 
     Escaping is applied per interpolation site, so its coverage is only as good as the
     author's memory — this defect reached separate call sites across three successive
-    commits, each fix correct and each leaving siblings unguarded
-. These two invariants
+    commits, each fix correct and each leaving siblings unguarded. These two invariants
     hold regardless of which site leaks, including sites not yet written.
 
     A forged heading, bullet, or row needs a newline inside a line the renderer meant as
@@ -657,8 +644,7 @@ def check_flags_reconcile(artifact: dict, rendered: str) -> None:
     counted = count_flags(artifact)
     coverage = artifact["coverage"]["criteria"]
     from_coverage = {
-        name: counts[St
-ate.FLAGGED.value]
+        name: counts[State.FLAGGED.value]
         for name, counts in coverage.items()
         if counts[State.FLAGGED.value]
     }
@@ -699,8 +685,7 @@ def header(artifact: dict) -> list[str]:
         joined = ", ".join(f"`{_safe_code(m)}`" for m in scan["manifests"])
         lines.append(f"**Manifests read:** {joined}  ")
     if scan.get("scanned_at"):
-        lines.append(f"**Scanned at:** {scan['scanned_
-at']}  ")
+        lines.append(f"**Scanned at:** {scan['scanned_at']}  ")
     lines += [f"**Direct dependencies:** {total} ({ecosystems})", ""]
     return lines
 
@@ -741,7 +726,6 @@ def summary(artifact: dict) -> list[str]:
         else:
             lines.append(
                 f"- **No known advisory affects any of the {total} direct dependencies**, "
-
                 f"checked at the versions this project resolves."
             )
     else:
@@ -758,6 +742,68 @@ def summary(artifact: dict) -> list[str]:
             f"shipped artifact cannot be determined here."
         )
     else:
-        lines.appen
+        lines.append(
+            f"- {len(flagged)} of {total} dependencies carry at least one finding, "
+            f"{len(prod_flagged)} of which "
+            f"{'reaches' if len(prod_flagged) == 1 else 'reach'} production."
+        )
+    lines.append(
+        f"- Weakest coverage: **{LABELS.get(weakest[1], weakest[1])}**, established for "
+        f"{weakest[0]} of {total}; the Coverage section lists every criterion."
+    )
+    lines.append("")
+    return lines
 
-... [Content truncated]
+
+def render(artifact: dict) -> str:
+    """Render the whole report, refusing an artifact that cannot support one.
+
+    Order is deliberate. An earlier version opened with the full coverage table, and a
+    reader with twenty minutes read two screens about the tool's limits before reaching
+    anything they could act on. The one coverage sentence that matters is in the summary;
+    the detail sits behind the findings.
+    """
+    validate_artifact(artifact)
+    lines = header(artifact)
+    lines += summary(artifact)
+    lines += production_section(artifact)
+    for criteria, heading in FINDING_GROUPS:
+        lines += findings_section(artifact, criteria, heading)
+    lines += transitive_section(artifact)
+    lines += informational_section(artifact)
+    lines += ["## Coverage", ""]
+    lines += [
+        "What was and was not measured, per criterion.",
+        "",
+        *coverage_table(artifact),
+        "",
+    ]
+    lines += unassessable_section(artifact)
+    lines += ["## Method and caveats", ""]
+    lines += [f"- {_safe_text(note)}" for note in artifact["notes"]]
+    lines.append("")
+    check_no_forged_lines(lines)
+    text = "\n".join(lines)
+    check_flags_reconcile(artifact, text)
+    return text
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("artifact", type=Path, help="collector JSON")
+    parser.add_argument("--out", type=Path, help="write Markdown here (default: stdout)")
+    args = parser.parse_args()
+    try:
+        text = render(json.loads(args.artifact.read_text(encoding="utf-8"), strict=False))
+    except ReconciliationError as exc:
+        raise SystemExit(f"error: {args.artifact} cannot be rendered: {exc}") from exc
+    if args.out:
+        args.out.write_text(text, encoding="utf-8")
+        print(f"wrote {args.out}")
+    else:
+        print(text)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

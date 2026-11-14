@@ -28,8 +28,7 @@ Read all source that establishes identity, authorization, isolation, and privile
 3. Per-resource authorization and tenant/owner scope.
 4. Process, browser, workload, CI, plugin, model/tool, device, or local-IPC authority.
 5. Privilege changes, confirmation, revocation, recovery, and fallback paths.
-6. Wh
-ich controls are source-visible and which depend on an unobserved deployment fact.
+6. Which controls are source-visible and which depend on an unobserved deployment fact.
 Return trust boundaries and control locations with repository-relative file:line references. Do not infer live reachability.
 ```
 
@@ -52,8 +51,7 @@ Read tests, build definitions, manifests, packaging, and maintained environment 
 4. Deployed controls and attachments that source cannot establish and therefore require needs_validation if decisive.
 5. The final active source path for each deployment mode only where the repository selects it deterministically.
 6. Whether the local platform can enforce an empty allowlisted environment, no external network, read-only target/toolchain mounts, scratch-only writes, and explicit CPU, memory, process, file-size, disk, and wall-clock limits. Missing controls block target-controlled execution.
-7. Whether trusted parent-side code can promote predeclared scratch files with path-confined no-follow descri
-ptor traversal, nonblocking regular-file checks, no-follow traversal of every destination parent, exclusive regular-file destination creation, and explicit per-file and cumulative size bounds. Missing promotion controls block use of scratch files as evidence.
+7. Whether trusted parent-side code can promote predeclared scratch files with path-confined no-follow descriptor traversal, nonblocking regular-file checks, no-follow traversal of every destination parent, exclusive regular-file destination creation, and explicit per-file and cumulative size bounds. Missing promotion controls block use of scratch files as evidence.
 ```
 
 Add focused reconnaissance agents for materially distinct deployment modes or subsystems that these four do not map. Do not silently omit them: if the budget gate in `SKILL.md` blocks a focused agent, launch nothing for it, seed the unmapped area as a `deferred` ledger unit with reason `budget_cannot_reserve_critics_and_validation`, and disclose the gap in the report.
@@ -66,8 +64,7 @@ Before selecting work, the parent reads every available prior `coverage-ledger.j
 - Carry an unchanged prior `confirmed` record into the current candidate set, with the same fingerprint, only when its relevant source, conditions, and qualifying evidence still apply. Link it to a current `planned` unit with `prior_status: "prior_confirmed_same_source"` and put only that root cause on the hunter exclusion list. The Phase 3 verifier that re-verifies the carried record becomes that unit's assignment owner; its source re-check is the unit's first check and moves the unit to `candidate` with the carried fingerprint.
 - Build a current planned `prior_confirmed_changed_source` revalidation unit when any relevant source or condition changed. Do not exclude that root cause from hunting or assume the prior verdict still applies.
 - Build current work units for every prior `needs_validation`, `deferred`, `blocked`, `out_of_scope`, and changed-source unit. These states are priority input, never deduplication or suppression keys.
-- Carry a still-blocked prior `needs_validation` record with the same fingerprint only after current source supports its trace. 
-Link it to a current `planned` unit with `prior_status: "prior_needs_validation"`; the record keeps the unresolved blocker. The Phase 3 verifier that re-checks the carried record becomes that unit's assignment owner; its re-check is the unit's first check and moves the unit to `candidate` with the carried fingerprint. Include the record in final verification.
+- Carry a still-blocked prior `needs_validation` record with the same fingerprint only after current source supports its trace. Link it to a current `planned` unit with `prior_status: "prior_needs_validation"`; the record keeps the unresolved blocker. The Phase 3 verifier that re-checks the carried record becomes that unit's assignment owner; its re-check is the unit's first check and moves the unit to `candidate` with the carried fingerprint. Include the record in final verification.
 - Treat prior rejected records as stale claims unless current evidence changes the failed trace or missing condition. An unchanged rejection suppresses only that exact claim, not review of the coverage unit.
 - Record missing or incompatible ledgers instead of treating them as empty coverage.
 
@@ -86,8 +83,7 @@ The parent synthesizes `<output-dir>/architecture.md`, with a hard cap of about 
 7. Prior coverage gaps, changed-source and blocked revalidation targets, and same-source confirmed exclusions.
 8. A short companion-selection summary derived from [ATTACK-CLASSES.md](ATTACK-CLASSES.md): selected files and the source-visible boundaries that require them.
 
-Keep the assignment-level ordinary block, selected companion blocks, and excluded blocks with reasons in e
-ach ledger unit, not in `architecture.md`. This keeps the architecture cap valid for large runs and makes the exact hunter prompt map machine-checkable.
+Keep the assignment-level ordinary block, selected companion blocks, and excluded blocks with reasons in each ledger unit, not in `architecture.md`. This keeps the architecture cap valid for large runs and makes the exact hunter prompt map machine-checkable.
 
 Do not select a companion file merely because the language or dependency name appears. Select it because reconnaissance found the trust-sensitive boundary described by its `When to use this file` section. Do not exclude a visible boundary just because another agent will review a related class.
 
@@ -99,8 +95,7 @@ Each dimension has a human label and a stable source-derived value in `canonical
 
 Derive `coverage_id` without lossy slugs:
 
-1. Require every reference to be Unicode NFC with valid scalar values, visible content, no control, format, line/paragraph separator, or defau
-lt-ignorable code point, and no surrounding whitespace.
+1. Require every reference to be Unicode NFC with valid scalar values, visible content, no control, format, line/paragraph separator, or default-ignorable code point, and no surrounding whitespace.
 2. Encode its UTF-8 bytes with RFC 3986 percent encoding: leave only `A-Z a-z 0-9 - . _ ~` unescaped and use uppercase `%HH` for every other byte.
 3. Join encoded `surface`, `boundary`, `subsystem`, and `attack_class` references with `::`; append encoded `lifecycle` when present.
 
@@ -137,8 +132,7 @@ Each unit records:
 }
 ```
 
-When `lifecycle` is material, add both `canonical_refs.lifecycle` and a human `lifecycle` field. `ordinary_attack_c
-lass_block` is null only when no ordinary block applies. The selected companion list includes each applicable class plus its companion `Core discipline`, `Universal moves`, and `Validation rules`; `excluded_blocks` records every considered but unselected block and the source fact that excludes it.
+When `lifecycle` is material, add both `canonical_refs.lifecycle` and a human `lifecycle` field. `ordinary_attack_class_block` is null only when no ordinary block applies. The selected companion list includes each applicable class plus its companion `Core discipline`, `Universal moves`, and `Validation rules`; `excluded_blocks` records every considered but unselected block and the source fact that excludes it.
 
 The parent may add bookkeeping fields but keeps the semantic fields above stable. In `prior_status`, `new` marks a surface first seen in this run when compatible prior ledgers exist; `none` marks a unit seeded when no compatible prior ledger is available. Prior `deferred`, `blocked`, `out_of_scope`, and changed-source units initialize as current `planned` work when now in scope. A prior same-source covered unit remains visible in the current ledger; assign changed source, important lifecycle paths, and exact conflicts first, then use the coverage critic to decide whether it needs another pass.
 
@@ -146,8 +140,7 @@ The parent may add bookkeeping fields but keeps the semantic fields above stable
 
 Enforce this state table exactly:
 
-| Status | Unit `agent_id` | `reviewed_paths` / `local_checks` | `result_fin
-gerprints` | `unresolved` |
+| Status | Unit `agent_id` | `reviewed_paths` / `local_checks` | `result_fingerprints` | `unresolved` |
 |---|---|---|---|---|
 | `planned` | null | empty | empty | empty |
 | `not_applicable`, `out_of_scope`, `deferred` | null | empty | empty | nonempty reason |

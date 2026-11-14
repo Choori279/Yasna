@@ -60,8 +60,7 @@ git diff <base>..<head> --name-only
 
 **Assess codebase size:**
 ```bash
-find . -name "*.sol" -o -name "*.rs" -o -name "*.go"
- -o -name "*.ts" | wc -l
+find . -name "*.sol" -o -name "*.rs" -o -name "*.go" -o -name "*.ts" | wc -l
 ```
 
 **Classify complexity:**
@@ -139,8 +138,7 @@ git diff <range> --name-only | grep -v "test"
 git diff <range> --name-only | grep "test"
 
 # For each changed function, search for tests
-grep -r "test.*functionName" test/ --inclu
-de="*.sol" --include="*.js"
+grep -r "test.*functionName" test/ --include="*.sol" --include="*.js"
 ```
 
 **Risk elevation rules:**
@@ -210,8 +208,7 @@ audit-context-building --scope [file containing changed function] --focus flow-a
 
 5. **Five Whys root cause:**
    - WHY was this code changed?
-   - WHY did the o
-riginal code exist?
+   - WHY did the original code exist?
    - WHY might this break?
    - WHY is this approach chosen?
    - WHY could this fail in production?

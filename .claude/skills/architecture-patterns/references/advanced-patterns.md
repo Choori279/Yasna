@@ -58,8 +58,7 @@ ecommerce/
 │       │   │   │   └── money.py
 │       │   │   └── interfaces/
 │       │   │       ├── order_repository.py
-│       │   │       └── catalog_
-client.py  # ACL port to catalog context
+│       │   │       └── catalog_client.py  # ACL port to catalog context
 │       │   ├── use_cases/
 │       │   │   ├── place_order.py
 │       │   │   └── cancel_order.py
@@ -114,8 +113,7 @@ class PricingService:
         return product.price.apply_discount(discount)
 
     def calculate_order_total(self, items: list[tuple[Product, int]]) -> Money:
-        subtotals = [self.apply_bulk_discount(p, q) for p,
- q in items]
+        subtotals = [self.apply_bulk_discount(p, q) for p, q in items]
         return sum(subtotals[1:], subtotals[0]) if subtotals else Money(0, "USD")
 ```
 
@@ -176,8 +174,7 @@ class CatalogHttpClient(CatalogClientPort):
 
         # Translation: Catalog speaks "price_cents" + "currency_code";
         # Ordering speaks Money(amount, currency).
-        return Prod
-uctSnapshot(
+        return ProductSnapshot(
             sku=data["sku"],
             name=data["title"],              # field name differs between contexts
             unit_price=Money(
@@ -223,8 +220,7 @@ class StubCatalogClient(CatalogClientPort):
 └─────────────────────────────────────────────────────────────────┘
 
 Relationship types:
-  Open Host Service  — upstream provides a stable 
-API for many downstream contexts
+  Open Host Service  — upstream provides a stable API for many downstream contexts
   ACL (Anti-Corruption Layer) — downstream translates upstream model to its own
   Shared Kernel     — two contexts share a small, explicitly governed sub-model
   Conformist        — downstream adopts upstream model as-is (last resort)
@@ -276,8 +272,7 @@ Use these rules when deciding aggregate boundaries:
 | Does removing the root make the child meaningless? | Child belongs inside the aggregate. |
 | Are you loading thousands of objects to change one? | Aggregate is too large — split it. |
 
-**Practical example — Order vs. 
-Customer:**
+**Practical example — Order vs. Customer:**
 
 ```python
 # Bad: Customer aggregate holds full Order objects
@@ -345,8 +340,7 @@ class PostgresOutboxPublisher:
 # use_cases/place_order.py — aggregate saves, events are extracted and stored
 # For the outbox, the repository port takes the open connection:
 #   async def save(self, order: Order, conn) -> None
-# s
-o the order row and the outbox rows commit in the same transaction.
+# so the order row and the outbox rows commit in the same transaction.
 class PlaceOrderUseCase:
     def __init__(
         self,
@@ -401,7 +395,6 @@ Visual dependency check — run this and look for any arrow pointing outward:
 
 ```bash
 # Install: pip install pydeps
-pydeps app --max-ba
-con=4 --cluster --rankdir=BT
+pydeps app --max-bacon=4 --cluster --rankdir=BT
 # Expected: domain has no outgoing edges to adapters or infrastructure
 ```

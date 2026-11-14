@@ -79,8 +79,7 @@ Step 1: [Concrete action through accessible interface]
   - Parameters: [Specific values]
   - Expected result: [What happens]
 
-St
-ep 2: [Next action]
+Step 2: [Next action]
   - Command: [Exact call/request]
   - Why this works: [Reference to code change]
   - System state change: [What changed]
@@ -163,8 +162,7 @@ Generate this for each finding:
 
 **PROOF:** Function is `external`, no auth required
 
-### 
-3. Exploitability
+### 3. Exploitability
 **RATING:** EASY
 - Single transaction
 - Public function

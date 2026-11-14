@@ -19,8 +19,7 @@ Use alongside `ATTACK-CLASSES.md`. This file covers browser sources and sinks, o
 ## DOM and object-state attack classes (subagent_type: `general`)
 
 **DOM-based XSS**
-Trace `location` fields, `document.referrer`, `window.name`, message data, storage, and browser-controlled document state into `i
-nnerHTML`, `outerHTML`, `document.write`, string-evaluating APIs, executable URLs, jQuery HTML APIs, or framework escape hatches. Interpolation escaped by the framework is not a finding.
+Trace `location` fields, `document.referrer`, `window.name`, message data, storage, and browser-controlled document state into `innerHTML`, `outerHTML`, `document.write`, string-evaluating APIs, executable URLs, jQuery HTML APIs, or framework escape hatches. Interpolation escaped by the framework is not a finding.
 
 **DOM clobbering**
 Attacker-injected `id` or `name` attributes shadow a global, form property, configuration object, or initialization flag later trusted by code. Require both a markup path that preserves the attribute and a security-relevant use of the clobbered value.
@@ -42,8 +41,7 @@ The server reflects or weakly matches `Origin` while allowing credentials and re
 ## Service-worker and browser-storage attack classes (subagent_type: `general`)
 
 **Service-worker registration and scope takeover**
-Attacker-influenceable con
-tent can become the registered worker script, control a path that receives an over-broad `Service-Worker-Allowed` scope, or alter update imports without integrity control. Verify the final script URL, response MIME type, origin, scope, and who controls every imported script. A normal same-origin worker with intended scope is not a defect.
+Attacker-influenceable content can become the registered worker script, control a path that receives an over-broad `Service-Worker-Allowed` scope, or alter update imports without integrity control. Verify the final script URL, response MIME type, origin, scope, and who controls every imported script. A normal same-origin worker with intended scope is not a defect.
 
 **Service-worker cache and identity confusion**
 The worker caches personalized responses without including account, tenant, authorization state, or request mode in its policy, then serves them after account switch or logout. Review fetch-event routing, cache names and keys, navigation fallbacks, cache cleanup, and whether error/offline paths return another user's prior response.
@@ -57,8 +55,7 @@ Tokens, private responses, draft data, or authorization decisions remain in `loc
 ## Cross-site information leak classes (subagent_type: `general`)
 
 **XS-Leaks and cross-origin state oracles**
-An attacker page can distinguish protected cross-origin state through resource load/error events, frame or window state, redirect behavior, timing, cache state, or response size while the browser attaches victim credentials. Require one concrete secret-bearing predicate such as whether a private object, role, or account exists. Generic timing variance or public-resource availability is not a fi
-nding.
+An attacker page can distinguish protected cross-origin state through resource load/error events, frame or window state, redirect behavior, timing, cache state, or response size while the browser attaches victim credentials. Require one concrete secret-bearing predicate such as whether a private object, role, or account exists. Generic timing variance or public-resource availability is not a finding.
 
 **Window and opener state disclosure**
 A cross-origin window's permitted metadata or navigation result reveals protected state, or a retained opener/named-window relationship lets an attacker-controlled page influence a privileged navigation. Check COOP, frame protections, `noopener`, exact origin, and whether the observable state is confidential.
@@ -81,7 +78,6 @@ A client source controls redirect or navigation without scheme and destination p
 
 1. Cite the source, sink, browser policy, affected origin/session, and observable mutation or disclosure.
 2. For prototype pollution, prove the recursive write and a security-relevant gadget. For DOM clobbering, prove the markup survives and the shadowed value is used.
-3. For service workers and stor
-age, prove lifecycle reachability: an attacker-controlled write or cache entry must reach a different account, tenant, or later authorization state.
+3. For service workers and storage, prove lifecycle reachability: an attacker-controlled write or cache entry must reach a different account, tenant, or later authorization state.
 4. For messaging, CORS, WebSocket, and XS-Leaks, show exact origin/source validation and the protected state or action exposed. Confirm that CSP, COOP/CORP, cookies, and SameSite policy do not already block it.
 5. Return `confirmed` findings only with a complete client path and bounded local evidence. Return `needs_validation` with the precise deployed header, extension permission, browser version, or renderer behavior an owner must verify.

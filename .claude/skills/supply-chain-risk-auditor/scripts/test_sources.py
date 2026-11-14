@@ -61,8 +61,7 @@ def test_non_github_repo_is_an_identifier_error_not_an_api_failure(tmp_path: Pat
 def test_bot_heuristic_is_conservative():
     for account in ("dependabot", "renovate", "github-actions", "release-bot", "ci"):
         assert looks_automated(account), account
-    for account in ("alice", "robotics
--lab", "botanist"):
+    for account in ("alice", "robotics-lab", "botanist"):
         assert not looks_automated(account), account
 
 
@@ -120,8 +119,7 @@ def test_offline_serves_seeded_entries(tmp_path: Path):
 def test_cached_404_stays_not_found(tmp_path: Path):
     http = Http(tmp_path, offline=True)
     seed(http, "GET", "https://example.com/gone", None)
-    with pytest.rais
-es(NotFound):
+    with pytest.raises(NotFound):
         http.get_json("https://example.com/gone")
 
 
@@ -175,8 +173,7 @@ def test_missing_getuid_reports_a_caveat_instead_of_crashing(
 ):
     """Windows has no os.getuid, and st_uid is always 0 there (issue #273).
 
-    The client mu
-st construct rather than raise AttributeError, and must hand back a
+    The client must construct rather than raise AttributeError, and must hand back a
     caveat naming what went unchecked — dropping the control silently would let the
     report claim a verified cache it never verified.
     """
@@ -221,8 +218,7 @@ def test_rate_limit_retries_once_then_gives_up(tmp_path: Path, monkeypatch: pyte
         _Response(200, '{"ok": 1}'),
     ]
     http = Http(tmp_path, offline=False)
-    monkeypatch.s
-etattr(http, "_open", lambda *a: responses.pop(0))
+    monkeypatch.setattr(http, "_open", lambda *a: responses.pop(0))
     monkeypatch.setattr(sources.time, "sleep", lambda s: None)
     assert http.get_json("https://api.github.com/repos/a/b") == {"ok": 1}
 
@@ -277,8 +273,7 @@ class PolicyHttp:
     def get_json(self, url: str, headers: dict | None = None) -> dict:
         outcome = self.outcomes.pop(0)
         if isinstance(outcome, Exception):
-            rai
-se outcome
+            raise outcome
         return outcome
 
 

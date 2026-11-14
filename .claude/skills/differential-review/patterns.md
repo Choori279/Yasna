@@ -75,8 +75,7 @@ function processExit() {
 
 **Detection:**
 ```bash
-git diff <range> | gr
-ep "^-.*require"
+git diff <range> | grep "^-.*require"
 git diff <range> | grep "^-.*assert"
 git diff <range> | grep "^-.*revert"
 ```
@@ -160,8 +159,7 @@ function withdraw() {
 ```bash
 git diff <range> | grep "^-.*onlyOwner"
 git diff <range> | grep "^-.*onlyAdmin"
-git
- diff <range> | grep "^-.*require.*msg.sender"
+git diff <range> | grep "^-.*require.*msg.sender"
 ```
 
 **Questions:**
@@ -257,7 +255,6 @@ require(token.transfer(user, amount), "Transfer failed");
 
 **Detection:**
 - Arrays that grow without limit
-
 - Loops over user-controlled array
 - Critical function depends on external call success
 

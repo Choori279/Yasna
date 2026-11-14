@@ -69,8 +69,7 @@ def make_dep(
         ecosystem=eco,
         name=name,
         version="1.0.0",
-        version_
-source=version_source,
+        version_source=version_source,
         dev=dev,
         repo="github.com/acme/pkg",
         exists=True,
@@ -121,8 +120,7 @@ def test_flagged_production_dependency_reaches_the_findings_table():
 
 def test_dev_none_never_renders_as_production():
     dep = make_dep("gomod", eco="Go", dev=None)
-    dep.signals["staleness"] = Signal.flagged("n
-o push in 3 years", "2023-01-01")
+    dep.signals["staleness"] = Signal.flagged("no push in 3 years", "2023-01-01")
     text = render(artifact([dep]))
     assert "### Production or build-time not declared" in text
     assert "### Reaches production" not in text
@@ -175,8 +173,7 @@ def test_transitive_flags_require_a_rendered_section():
             "checked": 3,
             "lockfile_entries": 3,
             "excluded_direct": 0,
-  
-          "unverifiable": [],
+            "unverifiable": [],
             "flagged": [
                 {
                     "ecosystem": "npm",
@@ -233,8 +230,7 @@ def test_render_refuses_an_artifact_it_cannot_support():
         render(art)
 
 
-def test_third_party_text_cannot_forge_a_section_o
-utside_tables():
+def test_third_party_text_cannot_forge_a_section_outside_tables():
     """Structural assertion on purpose: the table test asserted on the row it expected,
     which is exactly why it never noticed the notes and header paths were unguarded."""
     art = artifact([make_dep()])
@@ -282,8 +278,7 @@ def _table_rows_are_well_formed(text: str) -> bool:
 def test_forged_line_check_refuses_structure_it_did_not_assemble():
     """A direct unit test on purpose: it stays true no matter which interpolation sites
     are escaped, which is the point of moving the guard off the call sites. Every
-    legitimate
- line is appended to `lines` as its own element, so an embedded newline is
+    legitimate line is appended to `lines` as its own element, so an embedded newline is
     the signature of third-party text arriving unescaped."""
     check_no_forged_lines(["## Summary", "- a bullet", "| a | b |", "|---|---|"])
 
@@ -329,8 +324,7 @@ def test_a_pipe_in_a_name_cannot_add_a_table_column():
     assert _table_rows_are_well_formed(text)
     # parity alone counts `\|` as one pipe, so pin the escape too: it is what keeps the
     # cell intact, and GFM renders it as a literal pipe rather than a backslash
-    for name in ("evil", "nes
-ted"):
+    for name in ("evil", "nested"):
         row = next(line for line in text.splitlines() if line.startswith("|") and name in line)
         assert "\\|" in row
 
@@ -379,8 +373,7 @@ def test_unverifiable_entries_are_named_never_clean():
                     "ecosystem": "npm",
                     "name": "internal-lib",
                     "version": "1.0.0",
-                    "reason": "resolves from git+ssh://acme/inter
-nal, not the npm registry",
+                    "reason": "resolves from git+ssh://acme/internal, not the npm registry",
                 }
             ],
             "flagged": [],

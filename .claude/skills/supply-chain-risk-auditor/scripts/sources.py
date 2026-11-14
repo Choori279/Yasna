@@ -47,7 +47,6 @@ OSV_BATCH_MAX = 500
 # Entries older than this are refetched when online. Without a bound, a cached
 # `pushed_at` ages alongside the repository and manufactures staleness flags: a repo last
 # pushed 300 days before its document was cached, read from a 100-day-old entry, reports
-
 # "no push in 400 days" about a project that may have shipped yesterday.
 CACHE_MAX_AGE_SECONDS = 6 * 60 * 60
 
@@ -101,7 +100,6 @@ class Http:
         # notes so an unenforced control appears in "Method and caveats" rather than
         # nowhere.
         self.cache_owner_caveat = self._check_cache_owner()
-
         self.opener = urllib.request.build_opener()
         self.stats = {"hits": 0, "fetched": 0, "offline_misses": 0, "errors": 0, "stale": 0}
         self.oldest_hit_seconds = 0.0
@@ -142,8 +140,7 @@ class Http:
     # ------------------------------------------------------------------ cache
 
     def _path(self, method: str, url: str, body: str = "") -> Path:
-        digest = hashlib.sha256(f"{method} {url
-} {body} {self.auth_marker}".encode()).hexdigest()[
+        digest = hashlib.sha256(f"{method} {url} {body} {self.auth_marker}".encode()).hexdigest()[
             :32
         ]
         return self.cache_dir / f"{digest}.json"
@@ -189,8 +186,7 @@ class Http:
             return False
         return self.offline or entry.age_seconds <= CACHE_MAX_AGE_SECONDS
 
-    # -------------------------
------------------------------------------ fetch
+    # ------------------------------------------------------------------ fetch
 
     def _rate_limited(self, resp: _Response) -> bool:
         if resp.status == 429:
@@ -230,8 +226,7 @@ class Http:
                 raise Unavailable(f"rate limited by {url}")
         return self._decode(resp, url)
 
-    def _deco
-de(self, resp: _Response, url: str) -> dict:
+    def _decode(self, resp: _Response, url: str) -> dict:
         # 410 Gone is proxy.golang.org's "module does not exist"; treat both as provable
         # absence rather than as an outage.
         if resp.status in (404, 410):
@@ -281,8 +276,7 @@ def osv_advisories(http: Http, queries: list[tuple[str, str, str | None]]) -> li
     """Batch-query OSV. One HTTP call per 500 packages.
 
     Args:
-        http: C
-aching client.
+        http: Caching client.
         queries: (ecosystem, name, version) triples. A None version asks for every
             advisory recorded against the package, a historical claim rather than a
             statement about what the project installs.
@@ -322,8 +316,7 @@ aching client.
 
 # Substring hints. Conservative on purpose: a false negative overstates the human
 # publisher count, which is the safer direction, since a count of 1 is what creates a
-# flag. `depend
-abot` and `renovate` are named explicitly because neither contains a
+# flag. `dependabot` and `renovate` are named explicitly because neither contains a
 # hyphen next to "bot".
 _AUTOMATION_HINTS = ("-bot", "bot-", "-ci", "npm-cli", "github-actions", "dependabot", "renovate")
 
@@ -370,8 +363,7 @@ def npm_metadata(http: Http, name: str) -> dict:
         "latest": latest,
         "maintainers": maintainers,
         "human_maintainers": [m for m in maintainers if not looks_automated(m)],
-       
- "automated_maintainers": [m for m in maintainers if looks_automated(m)],
+        "automated_maintainers": [m for m in maintainers if looks_automated(m)],
         "has_install_script": bool(version_doc.get("hasInstallScript")),
         "provenance": bool((version_doc.get("dist") or {}).get("attestations")),
         "deprecated": version_doc.get("deprecated") or doc.get("deprecated"),
@@ -417,8 +409,7 @@ def pypi_metadata(http: Http, name: str, version: str | None = None) -> dict:
     return {
         "latest": latest,
         "yank_version": target,
-      
-  "yanked": any(f.get("yanked") for f in files) if files else None,
+        "yanked": any(f.get("yanked") for f in files) if files else None,
         "yanked_reason": (
             next((f.get("yanked_reason") for f in files if f.get("yanked")), None)
             if files
@@ -465,8 +456,7 @@ def depsdev_repo(http: Http, ecosystem: str, name: str, version: str | None) -> 
         raise Unavailable(f"no deps.dev lookup for {ecosystem} without a resolved version")
     if system == "go" and not version.startswith("v"):
         version = f"v{version}"
-    
-quoted = name.replace("/", "%2F")
+    quoted = name.replace("/", "%2F")
     doc = http.get_json(
         f"https://api.deps.dev/v3alpha/systems/{system}/packages/{quoted}/versions/{version}"
     )
@@ -509,8 +499,7 @@ def normalize_repo(raw: str) -> str:
         text = text.split("@", 1)[1].replace(":", "/", 1)
     text = text.removesuffix(".git").strip("/").removeprefix("www.")
     parts = text.split("/")
-  
-  if parts and "." not in parts[0] and len(parts) == 2:
+    if parts and "." not in parts[0] and len(parts) == 2:
         # npm's bare `owner/repo` shorthand implies GitHub.
         parts = ["github.com", *parts]
     if parts:
@@ -564,8 +553,7 @@ def github_repo(http: Http, repo_id: str, token: str | None) -> dict:
     owner_repo = slug.removeprefix("github.com/")
     if owner_repo.count("/") != 1:
         raise RepoIdentifierError(f"cannot parse owner/repo from {repo_id}")
-    headers = {"Accept": "applicat
-ion/vnd.github+json"}
+    headers = {"Accept": "application/vnd.github+json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     doc = http.get_json(f"https://api.github.com/repos/{owner_repo}", headers=headers)
@@ -615,8 +603,7 @@ def _security_policy(http: Http, owner_repo: str, headers: dict) -> bool | None:
 # — commonly for want of repository-admin access — and is a gap, not a finding.
 
 
-def scorecard_checks(http: Http, re
-po_id: str) -> dict[str, int]:
+def scorecard_checks(http: Http, repo_id: str) -> dict[str, int]:
     """Individual OpenSSF Scorecard check scores, keyed by Scorecard's own check names.
 
     Raises:
@@ -661,8 +648,7 @@ def pip_audit_vulnerable(requirements: Path) -> set[str]:
                 # anything without a wheel — executing the untrusted code this tool
                 # promises never to run. Measured: `--no-deps` alone still audited the
                 # resolved transitive set, so pip was still involved; `--disable-pip`
-                # (valid only w
-ith `--no-deps`) removes pip entirely and audits exactly
+                # (valid only with `--no-deps`) removes pip entirely and audits exactly
                 # the listed pins from registry metadata.
                 "--no-deps",
                 "--disable-pip",

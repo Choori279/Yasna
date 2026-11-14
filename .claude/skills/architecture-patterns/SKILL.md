@@ -35,8 +35,7 @@ Master proven backend architecture patterns including Clean Architecture, Hexago
 - Dependencies point inward only; inner layers know nothing about outer layers
 - Business logic is independent of frameworks, databases, and delivery mechanisms
 - Every layer boundary is crossed via an abstract interface
-- Testable 
-without UI, database, or external services
+- Testable without UI, database, or external services
 
 ### 2. Hexagonal Architecture (Ports and Adapters)
 
@@ -82,7 +81,6 @@ import asyncio
 from typing import Dict, Optional
 from domain.entities.user import User
 from domain.interfaces.user_repository import IUserRepository
-
 from use_cases.create_user import CreateUserUseCase, CreateUserRequest
 
 
@@ -134,8 +132,7 @@ Business logic has leaked into the infrastructure layer. Move all database calls
 
 ### Circular imports between layers
 
-A common symptom is `ImportError: cannot import name X` between `use_cases` and `adapters`. This happens when a use case imports a concrete adapter class instead of the abstract port. Enforce the rule: `use_cases
-/` imports only from `domain/` (entities and interfaces). It must never import from `adapters/` or `infrastructure/`.
+A common symptom is `ImportError: cannot import name X` between `use_cases` and `adapters`. This happens when a use case imports a concrete adapter class instead of the abstract port. Enforce the rule: `use_cases/` imports only from `domain/` (entities and interfaces). It must never import from `adapters/` or `infrastructure/`.
 
 ### Framework decorators appearing in domain entities
 

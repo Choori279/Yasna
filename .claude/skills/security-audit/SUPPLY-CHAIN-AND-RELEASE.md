@@ -19,8 +19,7 @@ Split large targets into dependency resolution, CI isolation, artifact provenanc
 ## Dependency and build-input attack classes (subagent_type: `general`)
 
 **Dependency source and namespace confusion**
-Resolver configuration can select an unintended public/private namespace, fallback registry, mirror, repository, or source URL. Review package names, source priority, lockfile and checksum use, alternate build files, platform-specific resolution, and first-install ve
-rsus update behavior.
+Resolver configuration can select an unintended public/private namespace, fallback registry, mirror, repository, or source URL. Review package names, source priority, lockfile and checksum use, alternate build files, platform-specific resolution, and first-install versus update behavior.
 
 **Mutable and unbound build inputs**
 Builds consume branches, tags, unverified submodules, downloaded tools, generated assets, remote includes, floating CI actions, or container tags whose content can change without source review. Require a lower-trust writer and a path into trusted build output; reproducibility by itself does not prove authenticity.
@@ -40,8 +39,7 @@ A pull request, issue comment, fork, dependency update, or external event runs c
 Attacker-controlled branch names, commit messages, issue fields, artifact names, matrix values, or generated output enter shell commands, template expressions, paths, or privileged workflow inputs without canonical validation.
 
 **Cache, artifact, and workspace trust mixing**
-A lower-trust job can populate a cache, artifact, shared workspace, or output that a higher-trust job later restores and executes or releases. Review cache keys and namespaces, ar
-tifact producer identity, digest binding, retention, and whether promotion re-resolves by mutable name.
+A lower-trust job can populate a cache, artifact, shared workspace, or output that a higher-trust job later restores and executes or releases. Review cache keys and namespaces, artifact producer identity, digest binding, retention, and whether promotion re-resolves by mutable name.
 
 **Automation identity overreach**
 CI jobs receive permissions beyond the operation, repository, environment, or duration needed, and untrusted job inputs can select the affected resource. Missing least privilege alone is hardening; require a reachable privileged action.
@@ -63,8 +61,7 @@ An extension package gains host authority beyond its declared scope, a lower-tru
 ## Universal moves (apply across the above)
 
 - Walk backward from a released digest or installed update to every source, generated input, credential, worker, cache, test result, and authorization decision.
-- Compare untrusted and protected workflow even
-ts side by side. Mark each persisted channel crossing between them and require an immutable identity plus producer trust.
+- Compare untrusted and protected workflow events side by side. Mark each persisted channel crossing between them and require an immutable identity plus producer trust.
 - Review revoked key, failed download, missing attestation, partial platform release, rollback, and registry outage paths. The failure policy is part of release integrity.
 
 ## Validation rules (apply before reporting ANY finding here)

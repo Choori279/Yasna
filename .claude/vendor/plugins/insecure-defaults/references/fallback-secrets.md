@@ -64,7 +64,6 @@ const DB_PASSWORD = process.env.DB_PASSWORD;
 # File: tests/fixtures/auth.py
 TEST_SECRET = 'test-secret-key-123'  # OK - test-only
 
-
 # Usage in test
 def test_token_creation():
     token = create_token('user1', secret=TEST_SECRET)

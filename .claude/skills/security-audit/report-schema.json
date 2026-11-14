@@ -62,8 +62,7 @@
                   "visibleContent": true
                 },
                 "description": {
-                  "ty
-pe": "string",
+                  "type": "string",
                   "minLength": 1,
                   "visibleContent": true
                 }
@@ -122,7 +121,6 @@ pe": "string",
             "description": "Target-neutral reproduction in the target's native interface.",
             "properties": {
               "attacker_perspective": {
-
                 "type": "string",
                 "minLength": 1,
                 "visibleContent": true
@@ -187,8 +185,7 @@ pe": "string",
             "properties": {
               "likelihood": {
                 "type": "object",
-              
-  "properties": {
+                "properties": {
                   "score": {
                     "type": "string",
                     "enum": ["informational", "low", "medium", "high", "critical"]
@@ -243,8 +240,7 @@ pe": "string",
             "additionalProperties": false
           }
         },
-        "required": ["verdict", "fingerprint", "title", "description", "root_cause", "intended_behavior", "trace", "evidence", "conditions", "execution", "remediatio
-n", "severity", "confidence"],
+        "required": ["verdict", "fingerprint", "title", "description", "root_cause", "intended_behavior", "trace", "evidence", "conditions", "execution", "remediation", "severity", "confidence"],
         "additionalProperties": false
       },
       {
@@ -311,8 +307,7 @@ n", "severity", "confidence"],
           },
           "evidence": {
             "type": "array",
-       
-     "minItems": 1,
+            "minItems": 1,
             "uniqueItems": true,
             "items": {
               "type": "object",
@@ -378,8 +373,7 @@ n", "severity", "confidence"],
             "minLength": 1,
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$"
           },
-          "
-title": {
+          "title": {
             "type": "string",
             "minLength": 1,
             "visibleContent": true
@@ -446,8 +440,7 @@ title": {
                 "description": {
                   "type": "string",
                   "minLength": 1,
-                  "visibleContent
-": true
+                  "visibleContent": true
                 }
               },
               "required": ["file", "line", "description"],

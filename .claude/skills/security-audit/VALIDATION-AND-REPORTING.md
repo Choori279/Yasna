@@ -15,8 +15,7 @@ target-controlled code only inside the approved OS-enforced sandbox: no external
 network, empty allowlisted environment, read-only target and tools, scratch-only
 writes, and explicit low resource and wall-clock limits. If any control is unavailable,
 do not execute; retain the exact missing capability as a needs_validation blocker.
-Treat every scratch entry as target-controlled after execution. After the sand
-box and
+Treat every scratch entry as target-controlled after execution. After the sandbox and
 all its processes terminate, only trusted parent-side code may promote a predeclared
 scratch-relative file, following the promotion procedure block included verbatim in
 this prompt. You and target code never write retained artifacts. If promotion is
@@ -49,8 +48,7 @@ in this prompt. A corrected record replaces the hunter's wording.
 Copy this promotion procedure verbatim into every candidate-verifier prompt:
 
 ```text
-Artifact promotion procedure (trusted parent-side co
-de only):
+Artifact promotion procedure (trusted parent-side code only):
 Reference only for you: the parent performs these steps; you never perform them.
 
 Before execution, the parent opens and retains trusted, non-inheritable directory
@@ -81,8 +79,7 @@ file separately:
 10. Never recursively copy or glob scratch, extract an archive into artifacts, or
     open or promote a symlink, FIFO, socket, device, directory, hard-linked file,
     changing file, or file that exceeds its bound.
-11. If any check is unavailable, cannot be enforced, or fails, discard the sc
-ratch
+11. If any check is unavailable, cannot be enforced, or fails, discard the scratch
     entry; if it is decisive evidence, retain `needs_validation` with the exact
     promotion blocker.
 ```
@@ -93,8 +90,7 @@ The parent checks that each verifier returned the same fingerprint unless it ide
 
 When verifier evidence updates a ledger check, set that check's `agent_id` to the verifier's canonical ID and list its nonempty repository-relative `reviewed_paths`. Keep the unit-level `reviewed_paths` equal to the union across checks. Use `method: "source"` with `artifact: null` for source-only review. Use `method: "local"` only with a file successfully promoted by trusted parent-side code below `agents/<check.agent_id>/artifacts/`. The unit retains its original assignment owner, so independently owned hunter and verifier checks can coexist. For a carried prior record's seeded `planned` unit there is no prior owner: the verifier that re-checks it becomes the unit's assignment owner, and its re-check is the unit's first check, moving the unit to `candidate` with the carried fingerprint.
 
-If a strict total-agent budget cannot cover every candidate, set the run status to incomplete and follow the deterministic budget rule in `SKILL.md`. 
-An unvalidated candidate remains only in the ledger. It does not enter `findings.json` under any verdict.
+If a strict total-agent budget cannot cover every candidate, set the run status to incomplete and follow the deterministic budget rule in `SKILL.md`. An unvalidated candidate remains only in the ledger. It does not enter `findings.json` under any verdict.
 
 ### Phase 4: Write and validate `findings.json`
 
@@ -110,8 +106,7 @@ Read `report-schema.json` immediately before writing. It uses `additionalPropert
 - A `needs_validation` record uses `claimed_root_cause`, `trace`, `evidence`, `blockers`, and at least one nonempty `validation_plan.local` or `validation_plan.deployment` field. Include both only when both contexts can resolve distinct facts. It must not use severity, execution, remediation, reason, or confirmed root cause.
 - A `rejected` record uses `claimed_root_cause`, `trace`, `evidence`, and `reason`. It must not use severity, execution, remediation, blockers, validation plan, or confirmed root cause.
 
-Every record has a stable fingerprint, title, description, and repository-relative source 
-paths. A multi-step trace begins with `entrypoint`, ends with `sink`, and uses `propagation` only between them. One-entry traces use `entrypoint` or `sink`. Overall severity cannot exceed demonstrated impact.
+Every record has a stable fingerprint, title, description, and repository-relative source paths. A multi-step trace begins with `entrypoint`, ends with `sink`, and uses `propagation` only between them. One-entry traces use `entrypoint` or `sink`. Overall severity cannot exceed demonstrated impact.
 
 Run:
 
@@ -140,8 +135,7 @@ For `confirmed`, require it to check:
 For `needs_validation`, require it to check:
 
 1. The source path is real and supports only the `claimed_root_cause` stated.
-2. Every listed blocker is decisive and not already answerable lo
-cally.
+2. Every listed blocker is decisive and not already answerable locally.
 3. The candidate names a boundary and a possible concrete result rather than a generic concern.
 4. At least one validation-plan field is present and exact. `local` uses a bounded fixture; `deployment` asks an owner to observe a configuration, identity, route, policy, or runtime fact. Do not invent a plan for an inapplicable context, and never send audit traffic to a deployment.
 5. The fingerprint matches prior/current records for the same root cause.
@@ -150,8 +144,7 @@ Each verifier returns exactly one JSON object: `{"decision":"verified","fingerpr
 
 Do not apply a Phase 5 replacement as final when it promotes a record to a stronger verdict, including any promotion to `confirmed`, or materially changes the root cause, trace, execution input or observed result, demonstrated impact, or severity. Give that complete replacement to a new independent verifier that did not hunt, perform Phase 3 validation, or propose the Phase 5 replacement. The new verifier rechecks the current source and independently reproduces any decisive local result under the execution boundary, then returns `verified` or another replacement. Apply a material replacement only after this fresh verification. If another material replacement results, repeat with a fresh verifier. If budget or independence is unavailable, remove the disputed record from `findings.json`, keep its ledger unit as an unresolved candidate, and set `run_status: "incomplete"` with an exact `incomplete_reason`. Non-material wording or repository-line corrections may be applied directly when they do not change meaning or evidence.
 
-After every applied replacement, rerun both validator
-s and update linked ledger decisions. If a final verifier identifies a separate root cause, assign a new fingerprint and send it through independent candidate validation before inclusion. Set `run_status: "complete"` only when every ledger candidate has an independent final disposition and every retained record passes Phase 5.
+After every applied replacement, rerun both validators and update linked ledger decisions. If a final verifier identifies a separate root cause, assign a new fingerprint and send it through independent candidate validation before inclusion. Set `run_status: "complete"` only when every ledger candidate has an independent final disposition and every retained record passes Phase 5.
 
 Do not verify only `confirmed` records. A misleading `needs_validation` handoff wastes owner time and can preserve a false premise.
 
@@ -167,8 +160,7 @@ Write:
 2. One short security posture summary.
 3. A confirmed-findings table: severity, title, affected boundary, and one-line observed result.
 4. Each confirmed finding: repository source location, lower-trust principal, target-native bounded reproduction, conditions, actual result, impact, priority rationale, and smallest source fix.
-5. A separate `NEEDS VALIDATI
-ON` table. Give each lead's title, repository trace, exact blocker, bounded local next step, and safe owner-observed deployment check. Do not assign severity or call it a confirmed vulnerability.
+5. A separate `NEEDS VALIDATION` table. Give each lead's title, repository trace, exact blocker, bounded local next step, and safe owner-observed deployment check. Do not assign severity or call it a confirmed vulnerability.
 6. Separate hardening notes and positive source patterns.
 7. Coverage summary from the ledger: covered, candidate, blocked, and deferred counts, plus important exclusions and the final critic result.
 

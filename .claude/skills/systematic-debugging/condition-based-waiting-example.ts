@@ -57,8 +57,7 @@ export function waitForEvent(
  *   // Wait for 2 AGENT_MESSAGE events (initial response + continuation)
  *   await waitForEventCount(threadManager, agentThreadId, 'AGENT_MESSAGE', 2);
  */
-export funct
-ion waitForEventCount(
+export function waitForEventCount(
   threadManager: ThreadManager,
   threadId: string,
   eventType: LaceEventType,
@@ -125,8 +124,7 @@ export function waitForEventMatch(
 
       if (event) {
         resolve(event);
-      } else if (Date.now() - startTi
-me > timeoutMs) {
+      } else if (Date.now() - startTime > timeoutMs) {
         reject(new Error(`Timeout waiting for ${description} after ${timeoutMs}ms`));
       } else {
         setTimeout(check, 10);

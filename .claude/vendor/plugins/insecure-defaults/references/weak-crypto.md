@@ -60,8 +60,7 @@ def cache_key(data):
 import bcrypt
 
 def hash_password(password):
-    return bcrypt.hashpw(pas
-sword.encode(), bcrypt.gensalt())
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 ```
 
 **Strong encryption**

@@ -66,8 +66,7 @@ def test_npm_alias_audits_the_target(tmp_path: Path):
     assert any("alias" in n for n in notes)
 
 
-def test_peer_dependencies_noted_not_a
-udited(tmp_path: Path):
+def test_peer_dependencies_noted_not_audited(tmp_path: Path):
     (tmp_path / "package.json").write_text(
         json.dumps({"dependencies": {"a": "^1"}, "peerDependencies": {"react": "^18"}})
     )
@@ -123,8 +122,7 @@ def test_npm_lockfile_git_and_hashless_entries_are_unverifiable(tmp_path: Path):
     (tmp_path / "package-lock.json").write_text(
         json.dumps(
             {
-                "packages
-": {
+                "packages": {
                     "node_modules/good": registry_entry("good", "1.0.0"),
                     "node_modules/evil-git-dep": {
                         "version": "2.0.0",
@@ -168,8 +166,7 @@ def test_pinned_version_extraction():
     assert _pypi_version("foo==1.0.*", {}, "foo") == (None, "unresolved")
     # pip-compile continuation and inline options end the version without corrupting it
     assert _pypi_version("requests==2.19.0 \\", {}, "requests") == ("2.19.0", "manifest-pin")
-    assert _pypi_version("requests==2.19.0 --has
-h=sha256:abc", {}, "requests") == (
+    assert _pypi_version("requests==2.19.0 --hash=sha256:abc", {}, "requests") == (
         "2.19.0",
         "manifest-pin",
     )
@@ -211,8 +208,7 @@ def test_uv_lock_closure_skips_the_project_itself(tmp_path: Path):
                 "",
                 "[[package]]",
                 'name = "Left_Pad"',
-           
-     'version = "1.0.0"',
+                'version = "1.0.0"',
                 'source = { registry = "https://pypi.org/simple" }',
             ]
         )
@@ -264,7 +260,6 @@ def test_uv_lock_non_registry_sources_are_unverifiable(tmp_path: Path):
 # ----------------------------------------------------------------------- Go parsing
 
 GOMOD = """\
-
 module example.com/demo
 
 go 1.21
@@ -326,8 +321,7 @@ def test_advisory_wording_matches_version_source():
         exists=True,
     )
     signal = _advisory_signal(dep, {dep.key: ["GO-2026-1"]})
-    assert signal.state is State.FLAGGED and "minim
-um" in signal.detail
+    assert signal.state is State.FLAGGED and "minimum" in signal.detail
 
 
 def test_staleness_threshold():
@@ -377,8 +371,7 @@ def seeded_http(cache_dir: Path, responses: dict[tuple[str, str, str], object]) 
     return http
 
 
-def osv_body(triples: list[tuple[str, str
-, str | None]]) -> str:
+def osv_body(triples: list[tuple[str, str, str | None]]) -> str:
     queries = []
     for eco, name, version in triples:
         query: dict = {"package": {"name": name, "ecosystem": eco}}
@@ -428,8 +421,7 @@ def test_sweep_excludes_direct_merges_dev_and_flags(tmp_path: Path):
         tmp_path / "cache",
         {("POST", OSV, osv_body(triples)): {"results": [{}, {"vulns": [{"id": "GHSA-1"}]}, {}]}},
     )
-    direct = [Dependency(ecosystem="npm", name="direc
-t", version="1.0.0")]
+    direct = [Dependency(ecosystem="npm", name="direct", version="1.0.0")]
     transitive, _ = sweep_transitive(http, tmp_path, direct)
     # total==3 only holds if the nested direct@0.9.0 was queried: the seeded cache
     # answers only the exact three-triple OSV payload built above
@@ -473,8 +465,7 @@ def test_ledger_is_sourced_independently_of_the_buckets(
         json.dumps(
             {
                 "packages": {
-                    "node_modules/attested": registry_entry(
-"attested", "1.0.0"),
+                    "node_modules/attested": registry_entry("attested", "1.0.0"),
                     "node_modules/vendored": {
                         "version": "2.0.0",
                         "resolved": "git+ssh://git@github.com/acme/vendored.git#abc",
@@ -518,8 +509,7 @@ def test_go_existence_is_measured_not_asserted(tmp_path: Path):
     assert real.exists is True and ghost.exists is False
     assert _advisory_signal(real, {real.key: []}).state is State.CLEAN
     # the empty answer for the nonexistent module must never read as clean
-    assert _advisory_
-signal(ghost, {ghost.key: []}).state is State.UNASSESSABLE
+    assert _advisory_signal(ghost, {ghost.key: []}).state is State.UNASSESSABLE
 
 
 def test_sweep_go_modules_need_proxy_attestation(tmp_path: Path):
@@ -566,8 +556,7 @@ def seed_full_project(tmp_path: Path) -> Path:
         ("GET", "https://api.npmjs.org/downloads/point/last-week/tiny-dep", ""): {
             "downloads": 5000
         },
-        ("GET", "h
-ttps://api.npmjs.org/downloads/point/last-week/ghost-dep", ""): None,
+        ("GET", "https://api.npmjs.org/downloads/point/last-week/ghost-dep", ""): None,
         (
             "GET",
             "https://api.deps.dev/v3alpha/systems/npm/packages/ghost-dep/versions/9.9.9",
@@ -611,8 +600,7 @@ def test_offline_end_to_end(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     # an empty answer about an unpublished package is not evidence of safety.
     assert ghost["flagged"] == []
     assert ghost["signals"]["advisories"]["state"] == State.UNASSESSABLE.value
-    a
-ssert not any(s["state"] == State.CLEAN.value for s in ghost["signals"].values())
+    assert not any(s["state"] == State.CLEAN.value for s in ghost["signals"].values())
 
     assert artifact["transitive"]["examined"] is False
 
@@ -656,8 +644,7 @@ def test_non_registry_direct_dep_is_never_queried(tmp_path: Path, monkeypatch: p
             ("GET", "https://registry.npmjs.org/tiny-dep", ""): {
                 "dist-tags": {"latest": "1.2.3"},
                 "versions": {"1.2.3": {"dist": {}}},
-                "maintainers": [{"name": "alic
-e"}, {"name": "bob"}],
+                "maintainers": [{"name": "alice"}, {"name": "bob"}],
                 "repository": {"url": "git+https://github.com/acme/tiny-dep.git"},
             },
             ("GET", "https://api.npmjs.org/downloads/point/last-week/tiny-dep", ""): {
@@ -698,8 +685,7 @@ def test_non_ascii_manifest_is_read_as_utf8(tmp_path: Path):
         json.dumps({"name": "p", "author": "José Álvarez", "dependencies": {}}).encode("utf-8")
     )
 
-    assert _read_jso
-n(manifest)["author"] == "José Álvarez"
+    assert _read_json(manifest)["author"] == "José Álvarez"
 
 
 def test_utf16_requirements_is_refused_not_a_traceback(tmp_path: Path):
@@ -743,8 +729,7 @@ def test_non_utf8_manifest_is_refused_not_a_traceback(tmp_path: Path):
     """JSON is UTF-8 by RFC 8259, so an undecodable manifest is malformed input.
 
     UnicodeDecodeError is a ValueError but not a JSONDecodeError, so before this it
-    escaped both `except` clauses and surface
-d as a traceback.
+    escaped both `except` clauses and surfaced as a traceback.
     """
     manifest = tmp_path / "package.json"
     manifest.write_bytes(b'{"author": "Jos\xe9"}')  # latin-1, invalid UTF-8
@@ -794,8 +779,7 @@ def _text_io_without_encoding(source: str) -> list[str]:
             continue
 
         func = node.func
-        if isinstance(func, ast.Attribute) and func.attr
- in TEXT_IO_ATTRS:
+        if isinstance(func, ast.Attribute) and func.attr in TEXT_IO_ATTRS:
             out.append(f"{node.lineno}: {func.attr}() with no encoding=")
         elif isinstance(func, ast.Name) and func.id == "open":
             out.append(f"{node.lineno}: open() with no encoding=")
@@ -810,6 +794,120 @@ def _text_io_without_encoding(source: str) -> list[str]:
 def test_every_text_io_call_names_its_encoding():
     """No text I/O anywhere in the package may fall back to the platform default.
 
-    The st
+    The static half of the pair below, covering sites the behavioural driver does not
+    execute — `render.py`'s artifact read and report write, and `pip_audit_vulnerable`'s
+    subprocess, which needs pip-audit installed to run at all.
 
-... [Content truncated]
+    Modules are globbed rather than listed, so a new one added to `scripts/` is covered
+    the day it lands. Tests are excluded: their fixtures write ASCII through
+    `write_text` by the dozen and are not what ships to a user.
+    """
+    package = Path(__file__).parent
+    modules = sorted(p for p in package.glob("*.py") if not p.name.startswith("test_"))
+    assert len(modules) >= 4, f"module discovery found only {[p.name for p in modules]}"
+
+    offenders = [
+        f"{path.name}:{hit}"
+        for path in modules
+        for hit in _text_io_without_encoding(path.read_text(encoding="utf-8"))
+    ]
+    assert not offenders, "text I/O without an explicit encoding:\n" + "\n".join(offenders)
+
+
+def test_the_encoding_check_detects_a_missing_encoding():
+    """The checker above must fail on the code it exists to reject.
+
+    Its predecessor passed while a real regression was present, so the guard is itself
+    guarded: both shapes it must catch are asserted here, including the multi-line
+    subprocess form that defeated the line-based version.
+    """
+    assert _text_io_without_encoding("p.read_text()")
+    assert _text_io_without_encoding("open(p)")
+    assert _text_io_without_encoding("p.write_text(x)")
+    assert _text_io_without_encoding(
+        "subprocess.run(\n    ['gh'],\n    capture_output=True,\n    text=True,\n)"
+    )
+    # ...and must not fire on the fixed forms.
+    assert not _text_io_without_encoding('p.read_text(encoding="utf-8")')
+    assert not _text_io_without_encoding(
+        'subprocess.run(\n    ["gh"],\n    text=True,\n    encoding="utf-8",\n)'
+    )
+    assert not _text_io_without_encoding("p.read_bytes()")
+    assert not _text_io_without_encoding('open(p, "rb")')
+    # urllib: bytes, so an encoding would be nonsense
+    assert not _text_io_without_encoding("self.opener.open(request, timeout=5)")
+
+
+def test_no_text_io_relies_on_the_platform_default_encoding():
+    """The behavioural half: run the real code paths and let CPython catch omissions.
+
+    Under `-X warn_default_encoding` an omitted `encoding=` raises EncodingWarning
+    (PEP 597), which is exactly the Windows defect in issue #273 — the platform default
+    is cp1252 there, not UTF-8. This drives `collect.py` and `sources.py` for real, so
+    it catches an omission the static check above could miss (a call built dynamically,
+    or one in a stdlib helper the package hands a file to). `render.py`'s two sites are
+    not on this path and are covered statically instead.
+    """
+    # Drives the readers and writers directly rather than `collect()`, which refuses an
+    # offline run against an empty cache ("this run measured nothing") before it reaches
+    # the render path. Every text I/O site in the package is on one of these calls.
+    driver = textwrap.dedent(
+        """
+        import sys, warnings
+        from pathlib import Path
+        warnings.simplefilter("error", EncodingWarning)
+
+        project = Path(sys.argv[1])
+
+        import collect, render, sources
+
+        collect.discover(project)                    # manifest, requirements and go.mod readers
+        collect.scan_metadata(project)               # .git/HEAD and its ref
+        collect._read_toml(project / "pyproject.toml")
+
+        http = sources.Http(project / ".cache", offline=True)
+        path = http._path("GET", "https://example.com/x")
+        http._write_cache(path, {"name": "José"}, 200)   # cache write
+        http.get_json("https://example.com/x")          # cache read
+
+        sources.gh_token()                           # subprocess(text=True), if gh exists
+        print("ok")
+        """
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        project = Path(tmp) / "project"
+        project.mkdir()
+        # Non-ASCII on purpose: the bytes must survive every layer.
+        (project / "package.json").write_text(
+            json.dumps({"name": "p", "author": "José", "dependencies": {"left-pad": "1.3.0"}}),
+            encoding="utf-8",
+        )
+        (project / "requirements.txt").write_text("flask==2.0.0  # José\n", encoding="utf-8")
+        (project / "go.mod").write_text("module x\n\ngo 1.21\n", encoding="utf-8")
+        (project / "pyproject.toml").write_text('[project]\nname = "José"\n', encoding="utf-8")
+        (project / ".git").mkdir()
+        (project / ".git" / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
+        script = Path(tmp) / "driver.py"
+        script.write_text(driver, encoding="utf-8")
+
+        scripts_dir = Path(__file__).parent
+        env = {**os.environ, "PYTHONPATH": str(scripts_dir)}
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-X",
+                "warn_default_encoding",
+                str(script),
+                str(project),
+            ],
+            capture_output=True,
+            text=True,
+            cwd=scripts_dir,
+            env=env,
+        )
+
+    assert "EncodingWarning" not in result.stderr, (
+        f"a text I/O call omitted encoding=:\n{result.stderr}"
+    )
+    assert result.returncode == 0, result.stderr
+    assert "ok" in result.stdout

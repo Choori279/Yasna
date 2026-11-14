@@ -66,6 +66,5 @@ app.use(cors({ origin: allowedOrigins }));
 **Debug mode disabled by default**
 ```python
 # File: config.py
-DEBUG = os.getenv('D
-EBUG', 'false').lower() == 'true'  # Default: false
+DEBUG = os.getenv('DEBUG', 'false').lower() == 'true'  # Default: false
 ```

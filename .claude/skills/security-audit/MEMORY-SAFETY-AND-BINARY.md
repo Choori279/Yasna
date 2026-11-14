@@ -19,8 +19,7 @@ Pick relevant classes from Phase 1 and split large targets by parser, allocator/
 ## Bounds, integer, and representation attack classes (subagent_type: `general`)
 
 **Out-of-bounds read or write**
-A length, offset, index, or terminator reaches a fixed or allocated buffer without a correct bound. Recalculate available he
-adroom after prefixes, alignment, padding, and terminators. Check both source and destination capacity, and whether a short input is read before its declared length is trusted.
+A length, offset, index, or terminator reaches a fixed or allocated buffer without a correct bound. Recalculate available headroom after prefixes, alignment, padding, and terminators. Check both source and destination capacity, and whether a short input is read before its declared length is trusted.
 
 **Integer overflow, underflow, truncation, and signedness**
 Review attacker-controlled arithmetic before allocation, copy, loop, indexing, and pointer operations. High-hit patterns include `a - b` with `b > a`, `count * element_size`, additions near the type maximum, negative values converted to unsigned, 64-bit lengths narrowed to 32-bit fields, and sentinel values such as `-1` becoming a large size. Confirm which checked representation is later used.
@@ -37,8 +36,7 @@ A buffer, padding, struct field, or vector capacity is returned, compared, hashe
 Owners are released while callbacks, wait queues, timers, iterators, borrowed slices, or cached raw pointers can still use them. Review every error, cancellation, close, and realloc path. For embedded notification anchors, each free path must drain or detach all observers.
 
 **Type confusion and invalid downcast**
-A tag, vtable, union discriminator, object kind, or foreign handle is checked differently from the representation later read. Look for unchecked dynamic casts, stale tags after reuse, and serialized types whose validated element differs from the element consumed. Confirm a wrong-type read or write locally without extending the 
-test beyond the violated invariant.
+A tag, vtable, union discriminator, object kind, or foreign handle is checked differently from the representation later read. Look for unchecked dynamic casts, stale tags after reuse, and serialized types whose validated element differs from the element consumed. Confirm a wrong-type read or write locally without extending the test beyond the violated invariant.
 
 **Reference-count and ownership races**
 Non-atomic retain/release, a check followed by an unlocked use, or inconsistent ownership across threads can free or mutate an object during access. Compare fast, error, shutdown, and compatibility paths for the same lock and ownership rules.
@@ -58,8 +56,7 @@ Caller and callee disagree on who allocates, frees, pins, or mutates a buffer, h
 Foreign code receives a struct, bitfield, packed record, callback signature, integer width, enum, or calling convention that differs by architecture or build flag. Verify `repr`, packing, alignment, endianness, and ABI-specific types. An in-repo declaration mismatch can be confirmed locally; an opaque foreign implementation requires `needs_validation`.
 
 **Unwind, exception, and thread-affinity violations**
-Exceptions or panics cross an ABI that forbids unwinding, callbacks run after teardown, or APIs requiring one runtime thread are invoked e
-lsewhere. Review error conversion and cancellation. Confirm whether the process aborts or state is corrupted before assigning impact.
+Exceptions or panics cross an ABI that forbids unwinding, callbacks run after teardown, or APIs requiring one runtime thread are invoked elsewhere. Review error conversion and cancellation. Confirm whether the process aborts or state is corrupted before assigning impact.
 
 ## Binary loading and runtime attack classes (subagent_type: `general`)
 
@@ -81,8 +78,7 @@ Live function pointers, callbacks, worker threads, or data views survive module 
 ## Kernel and privileged-interface attack classes (subagent_type: `general`)
 
 **User-copy bounds and repeated reads**
-A syscall, ioctl, dr
-iver, or kernel parser derives a trusted fact from user memory then reads the same mutable address again. Copy the full request once or revalidate the later copy. Also audit size, direction, and access checks at each user-copy primitive.
+A syscall, ioctl, driver, or kernel parser derives a trusted fact from user memory then reads the same mutable address again. Copy the full request once or revalidate the later copy. Also audit size, direction, and access checks at each user-copy primitive.
 
 **Privileged object lifecycle and dispatch consistency**
 Externally reachable objects have unbalanced retain/release, teardown without observer drain, unchecked selector/table indices, or duplicated compatibility paths that omit a guard. Diff each dispatch and free path side by side.
@@ -100,7 +96,6 @@ A device node, admin socket, helper, or management API validates shape but not t
 
 1. Establish a realistic untrusted entry and exact operation that violates a bounds, type, lifetime, ABI, concurrency, loader, or authority invariant.
 2. Classify the observable effect: invalid read, invalid write, stale alias, wrong object, uninitialized output, unauthorized image load, deadlock, or safe process termination. Do not claim a stronger effect than observed.
-3. Run the narrowest local harness, existing test, sanitizer, or fuzzer needed to reproduce the ef
-fect. Verify sanitizer coverage of the faulting operation and record architecture/build conditions.
+3. Run the narrowest local harness, existing test, sanitizer, or fuzzer needed to reproduce the effect. Verify sanitizer coverage of the faulting operation and record architecture/build conditions.
 4. For concurrency, use a deterministic schedule or sanitizer trace. For binary loading, prove the checked identity differs from the mapped identity and name the lower-trust writer.
 5. Return `confirmed` findings only with exact input, source trace, and observed result. Return `needs_validation` for a specific unresolved reachability, ABI, build, deployment, or runtime fact and state the bounded check needed.

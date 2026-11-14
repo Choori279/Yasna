@@ -98,8 +98,7 @@ For each HIGH/CRITICAL issue:
 **File**: TokenVault.sol:156
 **Commit**: abc123def
 **Blast Radius**: 23 callers (HIGH)
-**Test Coverage*
-*: NO
+**Test Coverage**: NO
 
 **Description**:
 Removed `require(msg.sender == owner)` check allows any user to withdraw funds.
@@ -200,8 +199,7 @@ N HIGH-risk functions without tests → Recommend blocking merge
 
 - Immediate actions (blocking)
 - Before production (tracking)
-- 
-Technical debt (future)
+- Technical debt (future)
 
 **Template:**
 ```markdown
@@ -323,8 +321,7 @@ Example: VeChain_Stargate_DIFFERENTIAL_REVIEW_2025-12-26.md
 
 ---
 
-## User Not
-ification Template
+## User Notification Template
 
 After generating report:
 

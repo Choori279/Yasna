@@ -53,8 +53,7 @@ def create_public_asset(path):
 
 **Restrictive by default**
 ```python
-# File: infrastructure
-/storage.py
+# File: infrastructure/storage.py
 def create_storage_bucket(name, public=False):
     acl = 'public-read' if public else 'private'
     if public:

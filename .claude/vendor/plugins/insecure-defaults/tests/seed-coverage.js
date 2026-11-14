@@ -50,8 +50,7 @@ const rows = [
   ...src.matchAll(/^ {2}\{ id: "([a-z-]+)", title: "([^"]+)" \},$/gm),
 ].map((m) => ({ id: m[1], title: m[2] }));
 
-if (rows
-.length === 0) {
+if (rows.length === 0) {
   console.error("FAIL: parsed 0 category rows from workflows/audit.js, so there is nothing to check");
   process.exit(1);
 }
@@ -115,8 +114,7 @@ for (const r of rows) {
   let data;
   try {
     data = JSON.parse(fs.readFileSync(jf, "utf8"));
-  } catch (e)
- {
+  } catch (e) {
     problems.push(`${r.id}.json does not parse: ${e.message}`);
     continue;
   }
@@ -168,8 +166,7 @@ for (const r of rows) {
       console.log(`  via  ${label}: caught by ${via.join(", ")}`);
     } else {
       hardGaps++;
-   
-   console.log(`  GAP  ${label}: NO SEED IN ANY CATEGORY MATCHES THIS`);
+      console.log(`  GAP  ${label}: NO SEED IN ANY CATEGORY MATCHES THIS`);
       problems.push(`${r.id}: "${label}" is documented but no seed matches it`);
     }
   }

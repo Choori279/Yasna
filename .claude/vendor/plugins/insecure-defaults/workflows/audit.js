@@ -64,8 +64,7 @@ const dirOf = (f) => {
 };
 
 // Each phase allowlists the profile fields it uses; the run's bookkeeping stays out.
-// A field recon omitted becomes an empty list 
-rather than vanishing, so the shape an
+// A field recon omitted becomes an empty list rather than vanishing, so the shape an
 // agent sees does not depend on recon.
 const contextFor = (fields, source) =>
   `<context>\n${JSON.stringify(
@@ -113,8 +112,7 @@ const objs = (required, properties, d) =>
 const RECON_SCHEMA = obj(
   ["scope_exists", "languages", "config_locations", "deploy_manifests", "exclude_paths"],
   {
-    scope_exists: bool("Whether
- the requested scope exists on disk. False stops the run: a missing path must not be reported as clean."),
+    scope_exists: bool("Whether the requested scope exists on disk. False stops the run: a missing path must not be reported as clean."),
     languages: STRS,
     frameworks: objs(["name", "settings_paths"], { name: STR, settings_paths: STRS }),
     config_locations: STRS,
@@ -141,8 +139,7 @@ const CANDIDATES_SCHEMA = obj(
     seed_patterns_run: strs("The seed patterns from <category>.json that you ran, verbatim."),
     derived_patterns: strs("Patterns you wrote yourself for THIS stack, beyond the seeds. An empty list means the sweep only looked for generic idioms, which is reported as a coverage gap."),
     candidates: objs(["file", "line", "snippet", "why_suspicious"], {
-      file
-: STR,
+      file: STR,
       line: INT,
       snippet: STR,
       symbol: str("Variable, constant, or key being defaulted."),
@@ -192,8 +189,7 @@ Report only what you observed. An empty list is a valid answer; a guessed one is
 
 Set \`scope_exists\` from that test, not from the path's shape. A missing path stops the run rather than sweeping nothing and reading as clean.
 
-**2. Profile the target** so the category sweeps can be tailored to it. A single file is profiled together with the configuration ma
-chinery it depends on (its imports, the config wrapper it calls, the settings module it reads from), not the whole repository:
+**2. Profile the target** so the category sweeps can be tailored to it. A single file is profiled together with the configuration machinery it depends on (its imports, the config wrapper it calls, the settings module it reads from), not the whole repository:
 
 - Languages present, with the file extensions to search.
 - Web/app frameworks and the concrete paths of their settings modules: Django \`settings.py\`, Rails \`config/environments/*.rb\`, Spring \`application*.yml\`, Express app bootstrap, Go \`main.go\` flag setup.
@@ -223,8 +219,7 @@ log(
 );
 
 // Everything an agent may be shown. `scope_exists` is spent by now; the rest is
-// all
-owlisted per phase below.
+// allowlisted per phase below.
 const profile = { ...recon, scope };
 
 const sweepContext = contextFor(
@@ -273,8 +268,7 @@ Set \`patterns_loaded\` and \`corpus_read\` from whether you actually read each 
 
 ${sweepContext}
 
-**Search target: \`${scope}\`.** Search it recursively; \`grep -rE\` covers a directory and a single fil
-e alike. Only lines **inside \`${scope}\`** are candidates, though you may read imports and the config helpers it calls to fill in \`symbol\`.
+**Search target: \`${scope}\`.** Search it recursively; \`grep -rE\` covers a directory and a single file alike. Only lines **inside \`${scope}\`** are candidates, though you may read imports and the config helpers it calls to fill in \`symbol\`.
 
 The caller named this path, so it is never out of scope: report candidates in it even if it sits under a tests or examples directory, noting the location in \`why_suspicious\` so the verifier can weigh it. Skip what the recon \`exclude_paths\` list names, but keep a path that looks production-reachable despite a suspicious-looking directory and say why in \`why_suspicious\`.
 
@@ -291,8 +285,7 @@ Keep patterns POSIX-ERE safe: \`[[:space:]]\` and \`[0-9]\`, never \`\\s\`, \`\\
 
 ## Step 2: run them and collect
 
-Run the \`.json\` seeds too, reporting them in \`seed_patterns_run\` and your ow
-n in \`derived_patterns\`. Keeping the two apart is the point: an empty \`derived_patterns\` says this sweep only looked for generic idioms, which is recorded as a coverage gap.
+Run the \`.json\` seeds too, reporting them in \`seed_patterns_run\` and your own in \`derived_patterns\`. Keeping the two apart is the point: an empty \`derived_patterns\` says this sweep only looked for generic idioms, which is recorded as a coverage gap.
 
 **Collect candidates, do not adjudicate them.** Do not spend turns tracing whether the app crashes without the config; a separate verifier does that with the whole file in context. Read enough around each match to fill in \`snippet\` and \`symbol\`, then move on. Over-collecting is cheap here; missing a line is not.
 
@@ -327,8 +320,7 @@ if (corpusFailures.length > 0) {
   };
 }
 
-// Zero-item guard: a search that matched no files must not return a
- clean bill.
+// Zero-item guard: a search that matched no files must not return a clean bill.
 const totalScanned = sweeps.reduce((n, s) => n + (s.files_scanned || 0), 0);
 if (sweeps.length === 0 || totalScanned === 0) {
   return {
@@ -373,8 +365,7 @@ const byLocation = new Map();
 for (const sweep of sweeps) {
   for (const c of sweep.candidates || []) {
     const key = `${sweep.category}:${c.file}:${c.line}`;
-    // Two patterns in on
-e category hitting one line: first wins, same finding.
+    // Two patterns in one category hitting one line: first wins, same finding.
     if (!byLocation.has(key))
       byLocation.set(key, { ...c, category: sweep.category });
   }
@@ -424,8 +415,7 @@ if (candidates.length === 0) {
 phase("Verify");
 
 // ---------------------------------------------------------------------------
-// Batching
-: by category, chunked at 16 findings.
+// Batching: by category, chunked at 16 findings.
 //
 // One category per verifier means one corpus and one discriminator for the whole
 // batch, where a per-file agent could be juggling six. The cap is because a category
@@ -477,7 +467,6 @@ for (const [category, group] of byCategory) {
     }
     current.push(...items);
   }
-
   if (current.length) packed.push(current);
 
   packed.forEach((cands, i) =>
@@ -533,8 +522,7 @@ const verdictSets = (
               : ` in ${batch.dirs.length} directories`
           }.${
             batch.dirs.length === 1
-              ? `\n\nThey are all in one directory, so they most likely share imports, a config module, and the same framework conventions. Tr
-ace the first one, then reuse what you learned instead of re-deriving it per file.`
+              ? `\n\nThey are all in one directory, so they most likely share imports, a config module, and the same framework conventions. Trace the first one, then reuse what you learned instead of re-deriving it per file.`
               : ""
           }
 
@@ -556,8 +544,7 @@ Work one file at a time: read it, then adjudicate every candidate listed for it 
    - **Configurable**: the value comes from a config lookup with a fallback. Trace what happens when the configuration is absent. Anything that stops the process (a raising lookup, a startup validator, a schema rejecting missing values) is **fail-secure → refuted**. Booting and carrying on with the literal is fail-open; keep going.
    - **Unconditional**: no configuration is in the picture; the insecure value is written in the code. **This step cannot refute an unconditional candidate**: the insecure value is the only value, so there is no fail-secure path to find and no missing variable to reason about. Record the shape and move to step 3.
 
-   Do **not** refute an unconditional candidate for "no configuration found", and do not record it as \`trace incomplete\` on those grounds. Roughly half of wh
-at this audit exists to find has no config fallback at all. Your corpus's **VULNERABLE** section shows which shapes this category takes in practice.
+   Do **not** refute an unconditional candidate for "no configuration found", and do not record it as \`trace incomplete\` on those grounds. Roughly half of what this audit exists to find has no config fallback at all. Your corpus's **VULNERABLE** section shows which shapes this category takes in practice.
 3. **Is the value actually insecure?** The **Skip when** line is the rule, and the **SECURE** section shows what a benign match looks like. For a configurable candidate the insecure state must be the *unconfigured* state; for an unconditional one, judge the value as written.
 4. **Does the value reach a security decision?** Trace it to its sink and cite \`file:line\`. Signing, encryption, authentication, authorisation, credential comparison, transport verification. A config value read and never consulted at an enforcement point → refuted.
 5. **Does deployment always supply the variable?** Configurable candidates only; unconditional ones have no variable to supply and nothing about deployment can mitigate them. Check every manifest in \`deploy_manifests\` and report which case holds in \`deployment_supplies_var\`. **No value here refutes anything**, it only moves severity:
@@ -569,8 +556,7 @@ at this audit exists to find has no config fallback at all. Your corpus's **VULN
 
 Follow imports and callers wherever a trace leads, but only the \`file\`/\`line\` pairs listed above belong in your output. Do not hunt new candidates: six sweeps have already searched, and anything you turn up now would skip dedup and arrive unverified.
 
-Return a verdict for **every** candidate listed, refutations included: one you omit is recorded as unverified and reported as a coverage gap, which is
- worse than a refutation with a reason. If you cannot complete a trace, return \`refuted: true\` with rationale \`"trace incomplete: <what blocked you>"\`.
+Return a verdict for **every** candidate listed, refutations included: one you omit is recorded as unverified and reported as a coverage gap, which is worse than a refutation with a reason. If you cannot complete a trace, return \`refuted: true\` with rationale \`"trace incomplete: <what blocked you>"\`.
 
 Assign a \`severity\` to every candidate you confirm, CRITICAL through LOW, on the evidence. Do not withhold low-severity confirmations; filtering happens downstream, and a finding you decline to report is one nobody can review.
 
@@ -616,8 +602,7 @@ const coverage = {
     (n, s) => n + (s.seed_patterns_run || []).length + (s.derived_patterns || []).length,
     0,
   ),
-  s
-eed_only_sweeps: seedOnlySweeps,
+  seed_only_sweeps: seedOnlySweeps,
   raw_candidates: rawCount,
   unique_candidates: candidates.length,
   files_with_candidates: distinctFiles,
@@ -674,8 +659,7 @@ ${JSON.stringify(coverage, null, 2)}
 
 Write markdown. Do not re-adjudicate the verdicts; the verifiers held the file context and you do not. Your job is presentation, grouping, and honest coverage accounting.
 
-Length follows the evidence. A finding's section runs as lon
-g as its trace needs and no longer: cite what establishes it, then move on. Do not restate in the summary what a finding section already says, pad one section to match another's length, or add sections beyond the five below.
+Length follows the evidence. A finding's section runs as long as its trace needs and no longer: cite what establishes it, then move on. Do not restate in the summary what a finding section already says, pad one section to match another's length, or add sections beyond the five below.
 
 Structure:
 
@@ -686,6 +670,44 @@ Structure:
        Location: <file>:<line>
        Pattern: <the offending line>
 
-       Verification: 
+       Verification: <what the trace established, with the sink at file:line>
+       Production Impact: <for a configurable finding, whether deployment supplies the variable per the manifests checked; for an unconditional one, say so plainly, since no configuration can mitigate it>
+       Exploitation: <the concrete attack, or "not exploitable as configured" with why>
 
-... [Content truncated]
+   Where several findings share one root cause (one config module, one wrapper function), group them under that cause and list the locations rather than repeating the analysis.
+3. **Remediation**: grouped by fix, not by finding. \`env['X']\` over \`env.get('X', default)\`, a startup validator, a secrets backend. Name the specific files to change.
+4. **Coverage and limits**: mandatory, and blunt. State the \`scope\`, files scanned, categories run, how many distinct patterns actually ran (\`patterns_run\`; a number close to the seed count means the sweeps barely adapted to this stack), and candidates found versus refuted. Every file holding a candidate was verified, so these four are the gaps, each stated explicitly when non-empty:
+
+   - \`unsearched_categories\`: those categories scanned 0 files (see \`files_scanned_by_category\`), so their search did not run. They appear in \`categories_run\` because the sweep returned, not because it searched. Name them under a "**Not searched**" heading and say the audit covers nothing in those categories. Never present them as clean or as having found nothing.
+   - \`unadjudicated\`: candidates handed to a verifier that came back without a verdict, listed as \`category:file:line\` so the rule is named alongside the location. Put them under a "**Not verified**" heading and say they may contain real findings.
+   - \`batches_verified\` below \`batches_run\`: a verify batch died, taking up to 16 candidates with it. Name the shortfall; the affected candidates appear in \`unadjudicated\`.
+   - \`seed_only_sweeps\`: those categories ran only the generic seed patterns and derived nothing for this stack, so their coverage is thinner. Name them.
+
+   A reader must not be able to mistake a partial run for a complete one.
+5. **Refuted candidates**: a compact table (location, step, one-line reason). This is the audit trail for why a pattern match was dropped, and it is what makes the run reviewable.
+
+Return the markdown itself, nothing else.`,
+  { label: "report", phase: "Report", model: MODELS.report },
+);
+
+// agent() returns null on terminal failure, and the caller prints `report`.
+if (!report) {
+  return {
+    status: "report-failed",
+    note:
+      `The audit ran to completion and ${confirmed.length} finding(s) survived verification, but the report agent ` +
+      `returned nothing. Present the findings from \`findings\`, \`refuted\` and \`coverage\` below. Do not re-run the ` +
+      `audit and do not report the target as clean.`,
+    coverage,
+    findings: confirmed,
+    refuted,
+  };
+}
+
+return {
+  status: confirmed.length > 0 ? "findings" : "no-findings-confirmed",
+  coverage,
+  findings: confirmed,
+  refuted,
+  report,
+};

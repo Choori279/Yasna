@@ -32,8 +32,7 @@ The scripts enforce two rules worth knowing before you read their output:
    `requirements*.txt`, or `go.mod`. If none exist, say so and stop — do not audit an
    ecosystem this collector does not parse by hand. Lockfiles read for exact versions
    and the transitive sweep: `package-lock.json`/`npm-shrinkwrap.json`, `uv.lock`, and
-   a go 1.
-17+ `go.mod`. `yarn.lock`, `pnpm-lock.yaml`, and `poetry.lock` are not read —
+   a go 1.17+ `go.mod`. `yarn.lock`, `pnpm-lock.yaml`, and `poetry.lock` are not read —
    the report says so when they are present, and versions fall back to pins or the
    latest release.
 2. Check `gh auth status`. Unauthenticated GitHub allows 60 requests/hour against 5,000,
@@ -69,8 +68,7 @@ Write added prose the way a security report reads, and apply the same register t
 report addendum and the final reply alike — replies get pasted into tickets and reports
 verbatim. State the finding, the datum behind it, and the action.
 
-- Impersonal and declarati
-ve: no first or second person ("I ran the collector", "you
+- Impersonal and declarative: no first or second person ("I ran the collector", "you
   should upgrade"), no contractions, no exclamation points.
 - Active voice, with the subject matter as the actor: "upgrading to 1.19.0 clears all
   25 advisories", not "it is recommended that axios be upgraded".
@@ -105,8 +103,7 @@ or framing.
 - "No findings, so the dependencies are safe." Read the coverage table; on PyPI and Go,
   half the criteria are structurally unassessable.
 - "The unassessable rows would just confuse the reader; I'll drop them." They are the
-  boundary of every claim in the report. Dr
-opping them turns partial coverage into a
+  boundary of every claim in the report. Dropping them turns partial coverage into a
   clean bill of health, which is the failure this skill was rebuilt to prevent.
 - "The version is probably close enough." A range checked at latest-release and a
   lockfile-resolved version are different claims; the report labels which one it makes.

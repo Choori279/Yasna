@@ -38,8 +38,7 @@ corpus can't be read, the run errors rather than guessing.
 
 Each category is three files that must agree:
 
-|      
-                  |                                                                      |
+|                        |                                                                      |
 | ---------------------- | -------------------------------------------------------------------- |
 | `workflows/audit.js`   | an `{ id, title }` row, all the script knows. Ships as `/insecure-defaults:audit-pipeline` |
 | `references/<id>.json` | title + seed patterns                                                |
@@ -61,8 +60,7 @@ Candidates come in two shapes, judged differently:
 | Verify   | N      | **Opus** | Refuting agents batched by category, ≤16 findings each |
 | Report   | 1      | Sonnet   | Severity, remediation, coverage                        |
 
-Between Discover and Verify: dedup keyed on `category:file:line`, so the rule id prefixes the path. Two patterns in one category hitting the same line collapse; the _same_ line flagged by two different categories stays as two candidates. `hashlib.md5(k)` can be a real weak-crypto finding and a false permissive-access match at once, and one merged verdict
- would have to cover both readings.
+Between Discover and Verify: dedup keyed on `category:file:line`, so the rule id prefixes the path. Two patterns in one category hitting the same line collapse; the _same_ line flagged by two different categories stays as two candidates. `hashlib.md5(k)` can be a real weak-crypto finding and a false permissive-access match at once, and one merged verdict would have to cover both readings.
 
 Verify then batches by category, ≤16 findings per agent. Each agent reads exactly one corpus and applies one discriminator. A category with more than 16 findings is split across several agents, so no single agent can run past the tool-call cap and return a partial verdict list. Coverage is uncapped; only per-agent size is.
 
@@ -86,8 +84,7 @@ Recon reports the project's own config wrappers, flagged if they can return a de
 
 Sweeps report seed patterns and derived patterns separately. Any sweep whose derived list is empty only looked for generic idioms, and is named in the report as a coverage gap.
 
-Seeds are POSIX ERE: `[[:space:]]` and `[0-9]`, never `\s`, `\d` or `\b`. S
-ome `grep` builds silently fail to match those, and a pattern that matches nothing is indistinguishable from a clean result. `tests/seed-coverage.js` rejects them.
+Seeds are POSIX ERE: `[[:space:]]` and `[0-9]`, never `\s`, `\d` or `\b`. Some `grep` builds silently fail to match those, and a pattern that matches nothing is indistinguishable from a clean result. `tests/seed-coverage.js` rejects them.
 
 To add a category: a row in `CATEGORIES` in `workflows/audit.js`, plus `<id>.json` and `<id>.md` in `references/`.
 

@@ -59,8 +59,7 @@ class SafeInputError extends Error {}
 
 function escapeUnsafeDiagnosticCharacters(value) {
   return String(value).replace(UNSAFE_DIAGNOSTIC_CHARACTER, (character) => {
-    const codePoint = character.codePoin
-tAt(0);
+    const codePoint = character.codePointAt(0);
     return codePoint <= 0xffff
       ? `\\u${codePoint.toString(16).padStart(4, "0")}`
       : `\\u{${codePoint.toString(16)}}`;
@@ -126,8 +125,7 @@ function deepEqual(left, right) {
 }
 
 function codePointLength(value) {
-  let 
-length = 0;
+  let length = 0;
   let index = 0;
   while (index < value.length) {
     const first = value.charCodeAt(index++);
@@ -195,8 +193,7 @@ function canonicalKey(value) {
         append(JSON.stringify(key));
         append(":");
         encode(item[key]);
-      })
-;
+      });
       append("}");
     } else {
       append(`${type}:${String(item)}`);
@@ -251,8 +248,7 @@ function collectSchemaErrors(schema, location = "schema") {
   const errors = createErrorList();
 
   function check(node, p) {
-    if (node === null || typeof node !== "object" || Array.isArray(n
-ode)) {
+    if (node === null || typeof node !== "object" || Array.isArray(node)) {
       errors.push(`${p}: schema must be an object`);
       return;
     }
@@ -300,8 +296,7 @@ ode)) {
             errors.push(`${p}.enum: ${error.message}`);
             break;
           }
-  
-        if (seen.has(key)) {
+          if (seen.has(key)) {
             errors.push(`${p}.enum: entries must be unique`);
             break;
           }
@@ -356,8 +351,7 @@ function findDiscriminator(schema) {
   if (!hasOwn(schema, "properties") || typeof schema.properties !== "object") return null;
   for (const key of Object.keys(schema.properties)) {
     const subSchema = schema.properties[key];
-    if (subSchema && t
-ypeof subSchema === "object" && hasOwn(subSchema, "const")) {
+    if (subSchema && typeof subSchema === "object" && hasOwn(subSchema, "const")) {
       return { key, value: subSchema.const };
     }
   }
@@ -400,8 +394,7 @@ function validate(value, schema, p, errors) {
 
   if (typeOf(value) === "object") {
     for (const req of hasOwn(schema, "required") ? schema.required : []) {
-      if (!hasOwn(value, req)) erro
-rs.push(`${p}: missing required field ${safeQuote(req)}`);
+      if (!hasOwn(value, req)) errors.push(`${p}: missing required field ${safeQuote(req)}`);
     }
     for (const key of Object.keys(value)) {
       if (hasOwn(schema, "properties") && hasOwn(schema.properties, key)) {
@@ -452,8 +445,7 @@ rs.push(`${p}: missing required field ${safeQuote(req)}`);
       if (!hasValidUnicodeScalarValues(value)) {
         errors.push(`${p}: must contain only valid Unicode scalar values`);
       } else if (!VISIBLE_CONTENT.test(value)) {
-        erro
-rs.push(`${p}: must contain a visible character`);
+        errors.push(`${p}: must contain a visible character`);
       }
     }
     if (hasOwn(schema, "pattern") && !(new RegExp(schema.pattern).test(value))) {
@@ -503,8 +495,7 @@ function collectFindingSemanticErrors(findings) {
 
     if (hasOwn(finding, "fingerprint") && typeof finding.fingerprint === "string") {
       if (fingerprints.has(finding.fingerprint)) {
-        errors.push(`${base}.fingerprint: duplicate of $[${fingerprints
-.get(finding.fingerprint)}].fingerprint`);
+        errors.push(`${base}.fingerprint: duplicate of $[${fingerprints.get(finding.fingerprint)}].fingerprint`);
       } else {
         fingerprints.set(finding.fingerprint, index);
       }
@@ -542,8 +533,7 @@ function collectFindingSemanticErrors(findings) {
     } else if (Array.isArray(finding.trace) && finding.trace.length > 1) {
       const last = finding.trace.length - 1;
       if (finding.trace[0] && finding.trace[0].kind !== "entrypoint") {
-        errors.push(`${base}.trace[0].kind: must be "entrypoint", got ${safe
-Quote(finding.trace[0].kind)}`);
+        errors.push(`${base}.trace[0].kind: must be "entrypoint", got ${safeQuote(finding.trace[0].kind)}`);
       }
       if (finding.trace[last] && finding.trace[last].kind !== "sink") {
         errors.push(`${base}.trace[${last}].kind: must be "sink", got ${safeQuote(finding.trace[last].kind)}`);
@@ -573,8 +563,7 @@ Quote(finding.trace[0].kind)}`);
       }
     } else if (verdict === "needs_validation") {
       if (hasOwn(finding, "severity")) errors.push(`${base}: needs_validation finding must not contain "severity"`);
-  
-    for (const forbidden of ["execution", "remediation", "reason", "root_cause"]) {
+      for (const forbidden of ["execution", "remediation", "reason", "root_cause"]) {
         if (hasOwn(finding, forbidden)) errors.push(`${base}: needs_validation finding must not contain ${safeQuote(forbidden)}`);
       }
       const plan = finding.validation_plan;
@@ -616,8 +605,7 @@ function readFileWithinLimit(file) {
   const noFollow = fs.constants.O_NOFOLLOW;
   const nonBlock = fs.constants.O_NONBLOCK;
   if (!Number.isInteger(noFollow) || noFollow === 0 || !Number.isInteger(nonBlock) || nonBlock === 0) {
-    throw new SafeInputError("OS no-follow and nonblocking input protection is unavai
-lable");
+    throw new SafeInputError("OS no-follow and nonblocking input protection is unavailable");
   }
 
   let descriptor;
@@ -683,8 +671,7 @@ function enforceJsonTextLimits(contents) {
       } else if (character === "\\") {
         escaped = true;
       } else if (character === "\"") {
-       
- inString = false;
+        inString = false;
       }
       continue;
     }
@@ -756,8 +743,7 @@ function run(file) {
   try {
     errors = validateDocument(findings, schema);
   } catch {
-    console.error("Failed to validate 
-findings JSON: unexpected validation error");
+    console.error("Failed to validate findings JSON: unexpected validation error");
     return 1;
   }
   for (const message of errors) console.error("ERROR:", escapeUnsafeDiagnosticCharacters(message));

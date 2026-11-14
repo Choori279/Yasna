@@ -19,8 +19,7 @@ Use `MEMORY-SAFETY-AND-BINARY.md` for memory-integrity defects and `PROTOCOLS-RP
 ## Computational amplification attack classes (subagent_type: `general`)
 
 **Superlinear parsing, matching, or evaluation**
-Small accepted input drives catastrophic regex backtracking, nested parsing, recursive validation, sym
-bolic evaluation, graph traversal, template expansion, or adversarial sort/hash behavior. Derive accepted depth/cardinality and complexity, then demonstrate a bounded growth curve locally.
+Small accepted input drives catastrophic regex backtracking, nested parsing, recursive validation, symbolic evaluation, graph traversal, template expansion, or adversarial sort/hash behavior. Derive accepted depth/cardinality and complexity, then demonstrate a bounded growth curve locally.
 
 **Decompression and representation amplification**
 Compressed, sparse, nested, aliased, or encoded input expands far beyond the checked transfer or file size. Verify limits after every expansion and across parser stages, including archives, images, fonts, structured documents, and protocol compression tables.
@@ -42,8 +41,7 @@ Client timeout, disconnect, canceled job, or failed authorization returns contro
 ## Quota and scheduling attack classes (subagent_type: `general`)
 
 **Pre-authentication work imbalance**
-Expensive parsing, key lookup, cryptography, decompression, or external requests happen before authentication and the earliest size/rate gate. Compa
-re minimal requester effort to shared service cost and check upstream limits.
+Expensive parsing, key lookup, cryptography, decompression, or external requests happen before authentication and the earliest size/rate gate. Compare minimal requester effort to shared service cost and check upstream limits.
 
 **Quota-accounting scope and reset gaps**
 Accounting uses attacker-influenceable IP, route, tenant, key prefix, task ID, or other dimension, allowing one principal's work to escape its intended budget or consume another principal's allocation. Review integer overflow, distributed races, retries, reconnects, and account switching.
@@ -67,8 +65,7 @@ A restart, restore, fallback, or cleanup path rebuilds unbounded state, ignores 
 
 ## Universal moves (apply across the above)
 
-- Build an input-to
--resource table: earliest accepted size/cardinality, work before auth, downstream fan-out, persistence, shared pool, limit and cleanup owner, recovery.
+- Build an input-to-resource table: earliest accepted size/cardinality, work before auth, downstream fan-out, persistence, shared pool, limit and cleanup owner, recovery.
 - Compare aggregate limits with per-object limits. Ten thousand valid one-byte items may evade a per-message cap while exhausting tenant-wide or process-wide state.
 - Validate only in an isolated fixture with strict CPU/memory/time limits and small growth points. Mock external and paid calls and stop once the missing bound or cancellation is observable.
 

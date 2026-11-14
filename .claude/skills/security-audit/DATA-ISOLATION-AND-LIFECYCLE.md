@@ -19,8 +19,7 @@ Split large targets by primary storage, cache/search, object/blob storage, analy
 ## Tenant and object-isolation attack classes (subagent_type: `general`)
 
 **Missing tenant or owner enforcement**
-A read, update, delete, list, count, or bulk query identifies an object without binding it to the authenticated tenant/owner, or trusts body fields to supply that identity. Compare direct lookup, nested relationship, bac
-kground, admin, import, and legacy paths.
+A read, update, delete, list, count, or bulk query identifies an object without binding it to the authenticated tenant/owner, or trusts body fields to supply that identity. Compare direct lookup, nested relationship, background, admin, import, and legacy paths.
 
 **Composite-key and namespace collision**
 Cache keys, object paths, database uniqueness, search document IDs, temporary files, or deduplication keys omit tenant or environment. Two principals can overwrite or retrieve the same logical key even though application records carry separate owners.
@@ -45,8 +44,7 @@ Counts, filters, ordering, errors, unique constraints, timings, notification beh
 ## Export, backup, restore, and migration attack classes (subagent_type: `general`)
 
 **Export and backup scope expansion**
-An export, sna
-pshot, portability package, report, or backup includes other tenants, inaccessible object fields, soft-deleted data, secret values, or history above the requester's access. Check per-item authorization after selection and authorization to download the final artifact.
+An export, snapshot, portability package, report, or backup includes other tenants, inaccessible object fields, soft-deleted data, secret values, or history above the requester's access. Check per-item authorization after selection and authorization to download the final artifact.
 
 **Import and restore authority expansion**
 Restore/import bypasses owner, schema, ACL, uniqueness, or validation rules, overwrites existing resources, or recreates records in a tenant the requester cannot write. Validate archive contents as untrusted and authorize the resulting operation rather than trusting prior provenance.
@@ -66,8 +64,7 @@ Direct lookup, search, relation traversal, object link, background processor, or
 Membership removal, ACL update, consent withdrawal, secret revocation, or role downgrade does not invalidate sessions, caches, subscriptions, jobs, or materialized data that continue to authorize future operations.
 
 **Retention and queued-work overrun**
-Deletion completes in primary storage while queued processors, retries, exports, analytics, or generated artifacts recreate or retain the data
- beyond the promised boundary. Find idempotent deletion and tombstone propagation.
+Deletion completes in primary storage while queued processors, retries, exports, analytics, or generated artifacts recreate or retain the data beyond the promised boundary. Find idempotent deletion and tombstone propagation.
 
 **Restore reintroduces invalid state**
 Backup, undo, undelete, or replica recovery restores data, credentials, memberships, or permissions that current policy no longer allows. Re-authorize restored state and reapply lifecycle changes made after the snapshot.

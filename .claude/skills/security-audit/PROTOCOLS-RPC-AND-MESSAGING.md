@@ -19,8 +19,7 @@ Split large systems by producer/consumer pair, external/internal peer role, sync
 ## Framing, schema, and interpretation attack classes (subagent_type: `general`)
 
 **Message boundary and canonicalization disagreement**
-Components disagree on length, compression, duplicate fields, unknown fields, encoding, numeric width, normalization, or envelope/body precedence. Compare generated and custom parsers, gateways, language bindings, and version converters. Confirm which principal, resource, or 
-operation differs after decoding.
+Components disagree on length, compression, duplicate fields, unknown fields, encoding, numeric width, normalization, or envelope/body precedence. Compare generated and custom parsers, gateways, language bindings, and version converters. Confirm which principal, resource, or operation differs after decoding.
 
 **Union, enum, and default confusion**
 Unknown variants, missing discriminators, zero values, default privileges, or compatibility mappings reach code that assumes a validated case. Review exhaustive dispatch, default branches, and how old consumers interpret newly added fields.
@@ -45,8 +44,7 @@ Predictable, reused, or cross-tenant correlation IDs let a response, webhook, ca
 ## Broker and queue isolation attack classes (subagent_type: `general`)
 
 **Topic, routing-key, and subscription scope gaps**
-A publisher or subscriber can select
- another tenant's topic, wildcard, consumer group, partition, reply queue, or dead-letter route. Check broker-enforced ACLs where visible and application-side namespace construction. Tenant text inside a payload is not isolation.
+A publisher or subscriber can select another tenant's topic, wildcard, consumer group, partition, reply queue, or dead-letter route. Check broker-enforced ACLs where visible and application-side namespace construction. Tenant text inside a payload is not isolation.
 
 **Dead-letter, retry, and diagnostic disclosure**
 Messages routed to dead-letter queues, error topics, tracing, or operator views contain secrets or cross-tenant payloads accessible to a lower-trust consumer. Review policy and redaction at the failure path, not just normal delivery.
@@ -66,8 +64,7 @@ Older state, revoked membership, canceled work, or pre-step-up authorization arr
 Acknowledgment occurs before durable commit and loses security-relevant work, or commit happens before an unreliable acknowledgment and duplicates a mutation. Evaluate transactional outbox/inbox behavior and failure recovery.
 
 **Partial multi-consumer transitions**
-Several consumers jointly implement one authorization or business transition, but retries and partial failure leave only a subset committed. Identify invariants that must become durable atomically or compensate with current authoriz
-ation.
+Several consumers jointly implement one authorization or business transition, but retries and partial failure leave only a subset committed. Identify invariants that must become durable atomically or compensate with current authorization.
 
 ## Universal moves (apply across the above)
 

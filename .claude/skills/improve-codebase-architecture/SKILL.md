@@ -26,8 +26,7 @@ Read the project's domain glossary (`GLOSSARY.md`) and any ADRs in the area you'
 
 Then spawn a sub-agent with a fresh context window to walk the codebase. Don't follow rigid heuristics; explore organically and note where you experience friction:
 
-- Where does understanding one concept requir
-e bouncing between many small modules?
+- Where does understanding one concept require bouncing between many small modules?
 - Where are modules **shallow**, with an interface nearly as complex as the implementation?
 - Where have pure functions been extracted just for testability, but the real bugs hide in how they're called (no **locality**)?
 - Where do tightly-coupled modules leak across their seams?
@@ -48,8 +47,7 @@ For each candidate, render a card with:
 - **Solution**: plain English description of what would change
 - **Benefits**: explained in terms of locality and leverage, and how tests would improve
 - **Before / After diagram**: side-by-side, custom-drawn, illustrating the shallowness and the deepening
-- **Recommendation strength**: one of `Strong`, `Worth exploring`, `Speculative`,
- rendered as a badge
+- **Recommendation strength**: one of `Strong`, `Worth exploring`, `Speculative`, rendered as a badge
 
 End the report with a **Top recommendation** section: which candidate you'd tackle first and why.
 
@@ -70,5 +68,4 @@ Side effects happen inline as decisions crystallize; call the Skill tool with "d
 - **Naming a deepened module after a concept not in `GLOSSARY.md`?** Add the term to `GLOSSARY.md`. Create the file lazily if it doesn't exist.
 - **Sharpening a fuzzy term during the conversation?** Update `GLOSSARY.md` right there.
 - **User rejects the candidate with a load-bearing reason?** Offer an ADR, framed as: _"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"_ Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing; skip ephemeral reasons ("not worth it right now") and self-evident ones.
-- **Want to explore alternative interfaces for the deepened module?** Call the Skill tool with "codebase-design" and use its design-it-twice pa
-rallel sub-agent pattern.
+- **Want to explore alternative interfaces for the deepened module?** Call the Skill tool with "codebase-design" and use its design-it-twice parallel sub-agent pattern.

@@ -19,8 +19,7 @@ Use `SUPPLY-CHAIN-AND-RELEASE.md` for build and promotion trust, `WEB-PROTOCOL-A
 ## Workload identity and IAM attack classes (subagent_type: `general`)
 
 **Workload identity overreach**
-A workload, pod, function, edge worker, or node identity can act on tenants, accounts, resources, or APIs beyond its role, and untrusted request or job input selects that target. Review cloud policy conditions, resource patterns,
- service-account attachment, namespace mapping, and fallback credentials.
+A workload, pod, function, edge worker, or node identity can act on tenants, accounts, resources, or APIs beyond its role, and untrusted request or job input selects that target. Review cloud policy conditions, resource patterns, service-account attachment, namespace mapping, and fallback credentials.
 
 **Cross-account or cross-tenant role confusion**
 Role assumption, external IDs, token exchange, workload federation, or resource policies accept identity claims not bound to the intended source account, audience, repository, namespace, or workload. Establish both trust policy and caller-controlled claim.
@@ -42,8 +41,7 @@ An untrusted URL, destination, or protocol selection reaches instance/container 
 ## Container and orchestration attack classes (subagent_type: `general`)
 
 **Host or control-plane capability exposure**
-A lower-trust workload can select privileged mode, capabi
-lities, host namespaces, host paths, device mounts, container runtime sockets, or service-account tokens that cross into node/control-plane authority. Bare absence of seccomp or read-only filesystem is hardening unless a reachable operation crosses that boundary.
+A lower-trust workload can select privileged mode, capabilities, host namespaces, host paths, device mounts, container runtime sockets, or service-account tokens that cross into node/control-plane authority. Bare absence of seccomp or read-only filesystem is hardening unless a reachable operation crosses that boundary.
 
 **Admission and policy path inconsistency**
 One deployment route enforces image identity, namespace, resource, secret, or privilege policy while another controller, job, upgrade, restore, or compatibility path does not. Confirm the alternate route and resulting deployed object.
@@ -65,8 +63,7 @@ Failure to mount, refresh, rotate, or revoke a workload credential causes stale 
 ## Managed storage, events, and edge attack classes (subagent_type: `general`)
 
 **Object and signed-URL policy confusion**
-Bucket/container policy, object keys, CDN origins, or
- signed URLs fail to bind principal, operation, object namespace, audience, or expiry. Review list/version operations and write paths as well as reads.
+Bucket/container policy, object keys, CDN origins, or signed URLs fail to bind principal, operation, object namespace, audience, or expiry. Review list/version operations and write paths as well as reads.
 
 **Event-source identity confusion**
 A function or worker trusts event body fields as source identity without validating provider-signed envelope, subscription/topic, account, region, and replay state. Compare push, pull, retry, and dead-letter paths.
@@ -85,6 +82,5 @@ An edge or serverless runtime assumes a secret, API, filesystem, isolation, or t
 1. Establish the active source path and effective deployment object; otherwise use `needs_validation` and state which rendered manifest or owner-observed attachment is missing.
 2. Name the lower-trust caller/workload, cloud or application identity, controllable selector, affected resource, and unauthorized operation or disclosure.
 3. Verify provider and orchestrator defaults at the pinned version. Do not assume a public IP, reachable metadata service, permissive firewall, or absent admission attachment.
-4. Local validation may render templates, evaluate policy, inspect container/user namespaces in an isolated fixture, or run an emulator with dummy i
-dentities. Do not probe live endpoints or alter shared cloud resources.
+4. Local validation may render templates, evaluate policy, inspect container/user namespaces in an isolated fixture, or run an emulator with dummy identities. Do not probe live endpoints or alter shared cloud resources.
 5. Return `confirmed` only with a complete active source trace and concrete boundary result. Return `needs_validation` with the exact deployed policy, identity attachment, overlay, network, or drift observation needed.

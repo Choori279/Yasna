@@ -60,8 +60,7 @@ def handle_error(error):
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  introspection: process.env.NODE_ENV !
-== 'production',
+  introspection: process.env.NODE_ENV !== 'production',
   playground: process.env.NODE_ENV !== 'production'
 });
 ```

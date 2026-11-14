@@ -59,8 +59,7 @@ function errorsFor(value) {
 
 function runCli(contents, options = {}) {
   const { nodeArgs = [], timeout = CLI_TIMEOUT_MS } = options;
-  const directory = fs.mkdte
-mpSync(path.join(os.tmpdir(), "validate-coverage-ledger-"));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "validate-coverage-ledger-"));
   const ledgerPath = path.join(directory, "coverage-ledger.json");
   try {
     fs.writeFileSync(ledgerPath, contents);
@@ -128,8 +127,7 @@ function archivedAttempt(overrides = {}) {
 }
 
 test("accepts an empty ledger and complete units", () => {
-  assert.dee
-pEqual(errorsFor([]), []);
+  assert.deepEqual(errorsFor([]), []);
   assert.deepEqual(errorsFor([unit()]), []);
 
   const missingAttempts = unit();
@@ -180,8 +178,7 @@ test("text preflight enforces structural cardinality limits", () => {
   assert.throws(() => preflightJsonText(tooManyUnits), /exceeds 10000 top-level unit limit/);
 
   const tooManyItems = `[[${"null,".repeat(LIMITS.collectionItems)}null]]`;
-  assert.throws(() => preflightJsonTex
-t(tooManyItems), /exceeds 1000 item array limit/);
+  assert.throws(() => preflightJsonText(tooManyItems), /exceeds 1000 item array limit/);
 
   const objectFields = Array.from(
     { length: LIMITS.objectFields + 1 },
@@ -218,8 +215,7 @@ test("rejects noncanonical, duplicate, and colliding IDs", () => {
   assert(errorsFor([wrong]).some((error) => error.includes("expected canonical ID")));
 
   const duplicate = unit();
-  assert(errorsFor([duplicate, unit()]).some((error) => error.includes("duplicate cov
-erage ID")));
+  assert(errorsFor([duplicate, unit()]).some((error) => error.includes("duplicate coverage ID")));
 
   const collision = unit();
   const differentMeaning = unit({ surface: "Delete-user route" });
@@ -268,8 +264,7 @@ test("requires owned artifacts for local checks and null artifacts for source ch
     status: "covered",
     agent_id: "hunter-1",
     reviewed_paths: ["src/router.ts"],
-    local
-_checks: [localCheck()],
+    local_checks: [localCheck()],
   });
   assert.deepEqual(errorsFor([local]), []);
 
@@ -323,8 +318,7 @@ _checks: [localCheck()],
 });
 
 test("requires canonical lowercase filesystem-safe agent IDs", () => {
-  for (const value of ["hunter-1", "ver
-ifier_2", "a0"]) assert.equal(isSafeAgentId(value), true, value);
+  for (const value of ["hunter-1", "verifier_2", "a0"]) assert.equal(isSafeAgentId(value), true, value);
   for (const value of ["Hunter-1", "hunter.1", "hunter-1.", "hunter ", "con", "prn", "aux", "nul", "com1", "lpt9", "../hunter"]) {
     assert.equal(isSafeAgentId(value), false, value);
   }
@@ -369,8 +363,7 @@ test("enforces state evidence", () => {
     agent_id: "hunter-1",
     reviewed_paths: ["src/router.ts"],
     local_checks: [sourceCheck()],
-    unresolved: ["The deployed p
-olicy is unavailable."],
+    unresolved: ["The deployed policy is unavailable."],
   });
   assert.deepEqual(errorsFor([blocked]), []);
   const blockedFingerprint = { ...blocked, result_fingerprints: ["forbidden-fingerprint"] };
@@ -425,8 +418,7 @@ test("archives prior evidence when a critic assigns a fresh owner", () => {
     wave: 2,
     status: "covered",
     agent_id: "hunter-2",
-    reviewed_paths
-: ["src/authz.ts"],
+    reviewed_paths: ["src/authz.ts"],
     local_checks: [sourceCheck("hunter-2", { reviewed_paths: ["src/authz.ts"] })],
   });
   assert.deepEqual(errorsFor([finalClosure]), []);
@@ -483,8 +475,7 @@ test("rejects reassignment owner reuse and evidence mixing", () => {
   });
   const historyErrors = errorsFor([mixedHistory]);
   assert(historyErrors.some((error) => error.includes("prior assignment owner evidence must remain in its earlier attempt")));
-  assert(historyErrors.some((error) => error.includes("artifact from an earlier att
-empt cannot be reused")));
+  assert(historyErrors.some((error) => error.includes("artifact from an earlier attempt cannot be reused")));
 
   const unordered = unit({
     attempts: [archivedAttempt(), archivedAttempt({
@@ -546,8 +537,7 @@ test("rejects format, default-ignorable, and invalid-scalar prose", () => {
   for (const invisible of ["\u200b", "\u034f", "\ufe0f", "\ud800"]) {
     assert(errorsFor([unit({ surface: invisible })]).some((error) => error.includes("surface")), JSON.stringify(invisible));
     assert(errorsFor([unit({
-      excluded
-_blocks: [{ block: "ATTACK-CLASSES.md#Access control", reason: invisible }],
+      excluded_blocks: [{ block: "ATTACK-CLASSES.md#Access control", reason: invisible }],
     })]).some((error) => error.includes("reason")), JSON.stringify(invisible));
   }
 });
@@ -600,8 +590,7 @@ test("returns a generic syntax error without parser-supplied controls", { skip: 
 });
 
 test("does not reflect controls from a failed CLI input path", () => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "validate-coverage-ledger-pat
-h-"));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "validate-coverage-ledger-path-"));
   const missingPath = path.join(directory, `missing-${TERMINAL_CONTROL_PAYLOAD}.json`);
   try {
     const result = spawnSync(process.execPath, [validatorPath, missingPath], {
@@ -649,8 +638,7 @@ test("rejects a FIFO through the CLI without blocking", { skip: process.platform
     assert.notEqual(result.error && result.error.code, "ETIMEDOUT", output);
     assert.equal(result.status, 1, output);
     assert.match(output, /input must be a regular file/);
-   
- assert.doesNotMatch(output, /stack|at validate-coverage-ledger/i);
+    assert.doesNotMatch(output, /stack|at validate-coverage-ledger/i);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
@@ -695,8 +683,7 @@ test("rejects multi-megabyte nesting under a constrained Node heap", { skip: !HA
   const openContainers = "[".repeat(2000000);
   const cases = [
     openContainers,
-    `${openContainers}0$
-{"]".repeat(2000000)}`,
+    `${openContainers}0${"]".repeat(2000000)}`,
   ];
   for (const contents of cases) {
     const result = runCli(contents, {
@@ -739,8 +726,7 @@ test("accepts a canonical ID derived from near-maximum multibyte references", ()
     surface: "\u6f22".repeat(1024),
     boundary: "\u00e9".repeat(1024),
     subsystem: "packages/api",
-    attac
-k_class: "\u6f22".repeat(1023) + "\u00e9",
+    attack_class: "\u6f22".repeat(1023) + "\u00e9",
   };
   const value = unit({ canonical_refs: canonicalRefs });
   assert(value.coverage_id.length > 16384, `coverage_id length ${value.coverage_id.length}`);

@@ -52,7 +52,6 @@ class Signal:
             )
         return cls(State.CLEAN, detail, value)
 
-
     @classmethod
     def flagged(cls, detail: str, value: object) -> Signal:
         """A positive finding.
@@ -98,7 +97,6 @@ TIER_SCORECARD = ("dangerous_workflow", "token_permissions", "binary_artifacts",
 # `downloads` earned its place here by measurement: a floor of 1,000/week flagged 0 of 141
 # dependencies across three real projects, so it detected nothing. It is retained because
 # it is the number that distinguishes a single-publisher package at 450M downloads/week
-
 # from one at 126K, which is prioritisation context rather than a finding.
 TIER_INFO = ("provenance", "security_policy", "downloads")
 
@@ -137,8 +135,7 @@ class Dependency:
     #   lockfile        exactly what the project installs
     #   manifest-pin    an exact pin in the manifest
     #   go-mod-minimum  go.mod's minimum; module-version selection may pick higher
-    #   latest-release  the registry's current release, not the projec
-t's choice
+    #   latest-release  the registry's current release, not the project's choice
     #   unresolved      nothing; advisory results are historical for the package
     version_source: str = "unresolved"
     # True = build-time only, False = ships in the artifact, None = the manifest declares
@@ -181,8 +178,7 @@ def coverage(deps: list[Dependency], criteria: tuple[str, ...] = CRITERIA) -> di
 
     Raises:
         ReconciliationError: If two dependencies share a key, or any dependency's signal
-            keys are not exactly `crite
-ria`. Both are ways a dependency disappears from
+            keys are not exactly `criteria`. Both are ways a dependency disappears from
             the report while the totals still look plausible.
     """
     keys = [dep.key for dep in deps]
@@ -234,8 +230,7 @@ def validate_artifact(artifact: dict) -> None:
     """Refuse an artifact that cannot support a report.
 
     This is deliberately a checker that fails when it inspects zero items, which is what
-    the repository's contributing guide ask
-s of anything that counts or filters.
+    the repository's contributing guide asks of anything that counts or filters.
 
     Args:
         artifact: A collector artifact.
@@ -282,8 +277,7 @@ def _validate_transitive(artifact: dict) -> None:
     transitive = artifact.get("transitive")
     if not isinstance(transitive, dict) or "examined" not in transitive:
         raise ReconciliationError(
-            "artifact carries no transitive accounting, so the report cannot st
-ate "
+            "artifact carries no transitive accounting, so the report cannot state "
             "whether the transitive tree was examined"
         )
     if not transitive["examined"]:
@@ -327,8 +321,7 @@ def _reconcile_transitive_counts(transitive: dict) -> None:
 def _reconcile_transitive_ledger(transitive: dict, total: int) -> None:
     """Every lockfile triple must land in a named bucket.
 
-    `total
-` is derived from the buckets themselves, so it reconciles by construction
+    `total` is derived from the buckets themselves, so it reconciles by construction
     even when a triple is silently dropped before bucketing — which is how a nested
     copy of a direct dependency once vanished from the sweep with the counts still
     balancing. `lockfile_entries` is counted from the lock readers' output, before any
@@ -366,8 +359,7 @@ def count_flags(artifact: dict) -> dict[str, int]:
     """Flags per criterion, taken from the dependency list rather than from coverage.
 
     The renderer compares this against the coverage table it prints. If a criterion is
-    counted in one place and render
-ed in the other, the report contradicts itself, and
+    counted in one place and rendered in the other, the report contradicts itself, and
     that is how a finding reaches the coverage table and no reader.
     """
     out: dict[str, int] = {}

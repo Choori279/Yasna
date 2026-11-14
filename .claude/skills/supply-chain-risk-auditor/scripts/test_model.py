@@ -77,8 +77,7 @@ def test_clean_signal_accepts_falsy_data():
     assert Signal.clean("not archived", False).value is False
 
 
-def test_flagged_and_una
-ssessable_demand_text():
+def test_flagged_and_unassessable_demand_text():
     with pytest.raises(ValueError):
         Signal.flagged("", value=True)
     with pytest.raises(ValueError):
@@ -142,8 +141,7 @@ def test_count_flags_matches_flagged_lists():
     dep = clean_dep()
     dep.signals["archived"] = Signal.flagged("repository is archived", True)
     art = artifact(deps=[dep])
-    asser
-t count_flags(art) == {"archived": 1}
+    assert count_flags(art) == {"archived": 1}
 
 
 # ------------------------------------------------------------- transitive accounting
@@ -211,8 +209,7 @@ def test_transitive_flag_without_advisory_ids_refused():
         artifact(transitive=bad)
 
 
-def test_transitive_without_unverifiable_account
-ing_refused():
+def test_transitive_without_unverifiable_accounting_refused():
     bad = {
         "examined": True,
         "reason": None,

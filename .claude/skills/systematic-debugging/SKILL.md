@@ -72,8 +72,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
-   `
-``
+   ```
    For EACH component boundary:
      - Log what data enters component
      - Log what data exits component
@@ -138,8 +137,7 @@ You MUST complete each phase before proceeding to the next.
 
 4. **Understand Dependencies**
    - What other components does this need?
-   - What settings, conf
-ig, environment?
+   - What settings, config, environment?
    - What assumptions does it make?
 
 ### Phase 3: Hypothesis and Testing
@@ -206,8 +204,7 @@ ig, environment?
 
    **STOP and question fundamentals:**
    - Is this pattern fundamentally sound?
-   - Are we "sticking with it thro
-ugh sheer inertia"?
+   - Are we "sticking with it through sheer inertia"?
    - Should we refactor architecture vs. continue fixing symptoms?
 
    **Discuss with your human partner before attempting more fixes**
@@ -253,8 +250,7 @@ If you catch yourself thinking:
 | "Just try this first, then investigate" | First fix sets the pattern. Do it right from the start. |
 | "I'll write test after confirming fix works" | Untested fixes don't stick. Test first proves it. |
 | "Multiple fixes at once saves time" | Can't isolate what worked. Causes new bugs. |
-| "Reference too long, I'll adapt the p
-attern" | Partial understanding guarantees bugs. Read it completely. |
+| "Reference too long, I'll adapt the pattern" | Partial understanding guarantees bugs. Read it completely. |
 | "I see the problem, let me fix it" | Seeing symptoms ≠ understanding root cause. |
 | "One more fix attempt" (after 2+ failures) | 3+ failures = architectural problem. Question pattern, don't fix again. |
 

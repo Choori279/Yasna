@@ -61,8 +61,7 @@ async function gitInit(directory: string) {
 
     if (!normalized.startsWith(tmpDir)) {
       throw new Error(
-        `Refusing git init outs
-ide temp dir during tests: ${directory}`
+        `Refusing git init outside temp dir during tests: ${directory}`
       );
     }
   }

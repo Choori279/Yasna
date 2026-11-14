@@ -24,8 +24,7 @@ Controls bolted on without a threat model are guesses. Before hardening, spend f
 
 1. **Map the trust boundaries.** Where does untrusted data cross into your system? HTTP requests, form fields, file uploads, webhooks, third-party APIs, message queues, and **LLM output** — plus the local values that look internal because the OS handed them to you: another process's command line or environment, filenames on a shared volume, a path in a job payload. Trust follows who *wrote* a value, not which channel delivered it. Every boundary is attack surface.
 2. **Name the assets.** What's worth stealing or breaking? Credentials, PII, payment data, admin actions, money movement.
-3.
- **Run STRIDE over each boundary** — a quick lens, not a ceremony:
+3. **Run STRIDE over each boundary** — a quick lens, not a ceremony:
 
 | Threat | Ask | Typical mitigation |
 |---|---|---|
@@ -61,8 +60,7 @@ If you can't name the trust boundaries for a feature, you're not ready to secure
 - Changing CORS configuration
 - Adding file upload handlers
 - Modifying rate limiting or throttling
-- 
-Granting elevated permissions or roles
+- Granting elevated permissions or roles
 
 ### Never Do
 
@@ -96,8 +94,7 @@ Pattern: [Authentication](references/hardening-patterns.md#broken-authentication
 ### Headers, CORS, and responses
 
 - Security headers on every response (helmet or the framework equivalent); CSP starts from `default-src 'self'` and is tightened, not loosened.
-- 
-CORS restricted to an explicit origin list from configuration. Never `*` with credentials.
+- CORS restricted to an explicit origin list from configuration. Never `*` with credentials.
 - Strip sensitive fields (`passwordHash`, reset tokens) before any response. Error bodies are generic; internals go to server logs only.
 
 Patterns: [Misconfiguration](references/hardening-patterns.md#security-misconfiguration), [Sensitive data exposure](references/hardening-patterns.md#sensitive-data-exposure).
@@ -117,8 +114,7 @@ Pattern: [SSRF](references/hardening-patterns.md#server-side-request-forgery-ssr
 
 ### Destructive operations on derived paths
 
-A delete, move, or overwrite is only as safe as the value naming its target, and trust follows who *wrote* that value, not which channel delivered it: another process's command line is as attacker-controlled as a form field. A shape check proves well-formedness, not authorization. Before the call, require all three: the resolved target (symlinks resolved) sits under an **allowlisted root**; it is at least one level **below** that root; and it carries **ownership evidence read
- before the operation**. On refusal, log the rejected target and stop; never fall back to a broader default path.
+A delete, move, or overwrite is only as safe as the value naming its target, and trust follows who *wrote* that value, not which channel delivered it: another process's command line is as attacker-controlled as a form field. A shape check proves well-formedness, not authorization. Before the call, require all three: the resolved target (symlinks resolved) sits under an **allowlisted root**; it is at least one level **below** that root; and it carries **ownership evidence read before the operation**. On refusal, log the rejected target and stop; never fall back to a broader default path.
 
 Why the check is weaker than it reads (marker self-attestation, check/use races): [Destructive paths](references/hardening-patterns.md#destructive-operations-on-derived-paths). Worked code: `references/security-checklist.md`.
 
@@ -138,8 +134,7 @@ Pattern: [Secrets management](references/hardening-patterns.md#secrets-managemen
 
 1. **Find the installation boundary and manager.** Use the workspace root that owns the lockfile, or an independent nested project only when it is outside that workspace. Corroborate `packageManager` (when present), the lockfile, and CI; stop on disagreement or competing lockfiles. Pin the manager version.
 2. **Block dependency scripts before first execution.** Bootstrap with scripts disabled or a documented fail-closed policy, inspect the pending script source, approve only the minimum, commit the policy, then verify with a clean frozen/immutable install. Never blanket-approve.
-3. **Run the native audit against the committed lockfile before every release.** Triage critical/high by **reachability** (runtime, build, test, deploy paths) and fix availability. Never apply forced remediation (`npm audit fix --force` or equivalent) automatically, since forced fixes may cross declared depe
-ndency ranges; preview, read changelogs, test each upgrade. Document every deferral with a reason and a review date.
+3. **Run the native audit against the committed lockfile before every release.** Triage critical/high by **reachability** (runtime, build, test, deploy paths) and fix availability. Never apply forced remediation (`npm audit fix --force` or equivalent) automatically, since forced fixes may cross declared dependency ranges; preview, read changelogs, test each upgrade. Document every deferral with a reason and a review date.
 4. **Audits only match known advisories.** They do not catch a newly malicious or typosquatted package (`cross-env` vs `crossenv`). Review new dependencies, lockfile diffs, and script-policy changes together: ownership, maintenance, release age, provenance, transitive graph. Verify registry signatures where supported (`npm audit signatures`, `pnpm audit signatures`) and treat their absence as a signal to investigate, not automatic proof of compromise (A06, LLM03).
 
 Triage decision tree: [Dependency audit triage](references/hardening-patterns.md#dependency-audit-triage). Manager matrix and install-script gate: `references/security-checklist.md`.
@@ -152,8 +147,7 @@ Hardening asks "can an attacker read it?" Privacy asks "should *we* hold it at a
 - **Collect only against a stated purpose.** "Might be useful later" is latent breach scope, not a purpose. Keep PII out of telemetry (the `observability-and-instrumentation` skill makes the same point from the ops side).
 - **Set retention up front, then actually delete.** Every personal-data store needs a TTL and a working deletion path, including backups, caches, search indexes, and analytics copies.
 - **Support the data-subject rights your jurisdiction requires** (GDPR, CCPA, and kin): export, correct, delete. Design the schema so a user's data is findable and erasable, not smeared irreversibly across systems.
-- **Consent gates collection and third-party sharing, and is auditable.** Sending PII to an analytics, ad, or LLM vendor is sharing; the vendor needs a data-pr
-ocessing agreement. Make region a configurable policy, not a hardcoded assumption.
+- **Consent gates collection and third-party sharing, and is auditable.** Sending PII to an analytics, ad, or LLM vendor is sharing; the vendor needs a data-processing agreement. Make region a configurable policy, not a hardcoded assumption.
 
 Classification table: [Data classification](references/hardening-patterns.md#data-classification). A privacy incident starts the breach-notification clock; run the postmortem with the `debugging-and-error-recovery` skill.
 
@@ -178,8 +172,7 @@ Before sign-off, walk `references/security-checklist.md`: it covers authenticati
 | "This is an internal tool, security doesn't matter" | Internal tools get compromised. Attackers target the weakest link. |
 | "We'll add security later" | Security retrofitting is 10x harder than building it in. Add it now. |
 | "No one would try to exploit this" | Automated scanners will find it. Security by obscurity is not security. |
-| 
-"The framework handles security" | Frameworks provide tools, not guarantees. You still need to use them correctly. |
+| "The framework handles security" | Frameworks provide tools, not guarantees. You still need to use them correctly. |
 | "It's just a prototype" | Prototypes become production. Security habits from day one. |
 | "Threat modeling is overkill here" | Five minutes of "how would I attack this?" prevents the design flaws no control can patch later. |
 | "It's just LLM output, it's only text" | That "text" can be a SQL statement, a script tag, or a shell command. Treat it like any untrusted input. |
@@ -198,8 +191,7 @@ Before sign-off, walk `references/security-checklist.md`: it covers authenticati
 - No rate limiting on authentication endpoints, or an in-memory limiter in front of more than one instance
 - Stack traces or internal errors exposed to users
 - Dependencies with known critical vulnerabilities, competing lockfiles at one installation boundary, non-reproducible installs, or blanket-approved scripts
-- Server fetches user-supplied URLs without an allowlis
-t (SSRF)
+- Server fetches user-supplied URLs without an allowlist (SSRF)
 - LLM/model output passed into a query, the DOM, a shell, or `eval`
 - Secrets, PII, or the full system prompt placed inside an LLM context window
 - Personal data collected with no stated purpose, retention limit, or deletion path

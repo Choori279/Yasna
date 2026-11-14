@@ -44,8 +44,7 @@ When TTFB is slow (> 800ms), check each component in DevTools Network waterfall:
 - [ ] No blocking JavaScript in `<head>` (use `defer` or `async`)
 - [ ] Heavy computation offloaded to Web Workers (if applicable)
 - [ ] `React.memo()` on expensive components that re-render with same props
-- [ ] `useMemo()` 
-/ `useCallback()` only where profiling shows benefit
+- [ ] `useMemo()` / `useCallback()` only where profiling shows benefit
 - [ ] Long tasks (> 50ms) broken up to keep the main thread available — main lever for INP
 - [ ] `yieldToMain` pattern used inside long-running loops so input events can run between chunks
 - [ ] Modern scheduling APIs used where available: `scheduler.yield()` (preferred), `scheduler.postTask()` with priorities, `isInputPending()` to yield only when needed
@@ -74,8 +73,7 @@ When TTFB is slow (> 800ms), check each component in DevTools Network waterfall:
 - [ ] API responses cached where appropriate (`Cache-Control`)
 - [ ] HTTP/2 or HTTP/3 enabled
 - [ ] Resources preconnected (`<link rel="preconnect">`) for known origins
-- 
-[ ] `fetchpriority` used on critical non-image resources (e.g., key `<link rel="preload">`, above-the-fold `<script>`) — not only on `<img>`
+- [ ] `fetchpriority` used on critical non-image resources (e.g., key `<link rel="preload">`, above-the-fold `<script>`) — not only on `<img>`
 - [ ] No unnecessary redirects
 
 ### Rendering
@@ -109,8 +107,7 @@ When TTFB is slow (> 800ms), check each component in DevTools Network waterfall:
 - [ ] Not indexing low-selectivity columns *for the dominant value*; a partial index still serves the rare-value query (`WHERE status = 'failed'`)
 - [ ] Expression index used where the query applies a function (`lower(email)`)
 - [ ] Full-text or trigram index used for leading-wildcard search, not a B-tree
-- [ ] Write cost meas
-ured on write-heavy tables (every index taxes every `INSERT`/`UPDATE`)
+- [ ] Write cost measured on write-heavy tables (every index taxes every `INSERT`/`UPDATE`)
 - [ ] Unused and duplicate indexes dropped (they cost writes and buy nothing)
 
 #### Connection pooling
@@ -144,8 +141,7 @@ The decision material (which layer, which invalidation strategy, what never to c
 | **Cache-aside** (lazy) | App checks cache, on miss reads origin and populates | Default choice; read-heavy, tolerant of a cold first hit | Every miss hits the origin, so it needs stampede protection |
 | **Read-through** | Cache layer itself loads on miss | You want the load path in one place, not at every call site | Hides origin latency; a slow origin looks like a slow cache |
 | **Write-through** | Write goes to cache and origin together, synchronously | Reads must never see a stale value after a write | Adds cache latency to every write |
-| **Write-behind** (write-back) | Write hits 
-cache, origin updated asynchronously | Write-heavy, and the origin is the bottleneck | Data loss window if the cache dies before the flush. Needs durability you can defend |
+| **Write-behind** (write-back) | Write hits cache, origin updated asynchronously | Write-heavy, and the origin is the bottleneck | Data loss window if the cache dies before the flush. Needs durability you can defend |
 
 ### Negative caching
 
@@ -181,8 +177,7 @@ For a shared cache, the same idea needs a distributed lock, or `stale-while-reva
 - [ ] One invalidation strategy chosen (TTL, event/tag, or versioned keys), not an accidental mix
 - [ ] Acceptable staleness window written down, not implied by whatever TTL was typed
 - [ ] Stampede protection on hot keys (coalescing, lock, or `stale-while-revalidate`)
-- [ ] Negative result
-s cached with a shorter TTL; origin errors never cached
+- [ ] Negative results cached with a shorter TTL; origin errors never cached
 - [ ] Eviction policy and memory ceiling set (an unbounded cache is a memory leak)
 - [ ] Hit rate monitored — a cache nobody measures is an assumption, and a low hit rate is pure overhead
 - [ ] Nothing cached whose staleness is a correctness bug (balances, permissions, inventory at checkout)
@@ -230,8 +225,7 @@ onINPWithAttribution(({ value, attribution }) => {
 |---|---|---|
 | N+1 queries | Linear DB load growth | Use joins, includes, or batch loading |
 | Unbounded queries | Memory exhaustion, timeouts | Always paginate, add LIMIT |
-| Missing indexes | Slow reads as data grows |
- Add indexes for filtered/sorted columns |
+| Missing indexes | Slow reads as data grows | Add indexes for filtered/sorted columns |
 | Indexing without reading the plan | Write cost paid, read gain unproven | `EXPLAIN ANALYZE` before and after; revert if the plan is unchanged |
 | Redundant / unused indexes | Every write pays for them | Audit usage stats, drop what nothing reads |
 | Connection pool per request | Exhausts `max_connections` under load | One pool per process; proxy for serverless |

@@ -14,8 +14,7 @@ Use `confirmed` only when source evidence and bounded validation establish the f
 >
 > **Client-side and browser targets** (SPAs, browser extensions, embedded webviews, service workers, browser storage, cross-window messaging, CORS, WebSockets, or DOM rendering): use [CLIENT-SIDE.md](CLIENT-SIDE.md).
 >
-> **Supply-chain and release targets** (
-dependency resolution, generated inputs, CI, release/signing/promotion, updates, plugins, or extensions): use [SUPPLY-CHAIN-AND-RELEASE.md](SUPPLY-CHAIN-AND-RELEASE.md).
+> **Supply-chain and release targets** (dependency resolution, generated inputs, CI, release/signing/promotion, updates, plugins, or extensions): use [SUPPLY-CHAIN-AND-RELEASE.md](SUPPLY-CHAIN-AND-RELEASE.md).
 >
 > **Cloud and deployment targets** (IAM, infrastructure as code, containers/Kubernetes, service mesh, serverless/edge, ingress, provider events, or runtime configuration): use [CLOUD-AND-DEPLOYMENT.md](CLOUD-AND-DEPLOYMENT.md).
 >
@@ -33,8 +32,7 @@ Trace untrusted input from entry point to dangerous sink. What counts as a "dang
 - Libraries: any function that processes caller-supplied data without validation — buffer operations, parsers, format strings
 - CLI tools: shell command construction, file path handling, environment variable interpolation
 - Services: query construction, message serialization, log injection, LDAP/XPATH queries
-- Client-side (brow
-ser/JS): DOM XSS, prototype pollution, `postMessage`/origin trust, and other browser-side classes — covered by the [CLIENT-SIDE.md](CLIENT-SIDE.md) companion blocks when selected
+- Client-side (browser/JS): DOM XSS, prototype pollution, `postMessage`/origin trust, and other browser-side classes — covered by the [CLIENT-SIDE.md](CLIENT-SIDE.md) companion blocks when selected
 
 Do not stop at the obvious direct paths. Look for indirect injection: data stored safely, then retrieved and used in a dangerous context by different code. Look for injection through field names, keys, headers, and metadata — not just values. Look for injection into secondary systems (logs, caches, search indexes, analytics).
 
@@ -57,8 +55,7 @@ For complex access models, split into separate agents for auth bypass vs authori
 
 **Cryptography and secrets** (subagent_type: `general`)
 - Weak randomness for security-critical values (tokens, keys, nonces)
-- Hardcoded secrets, secrets in logs,
- error messages, URLs, or client-visible responses
+- Hardcoded secrets, secrets in logs, error messages, URLs, or client-visible responses
 - Broken key derivation, missing HMAC verification, nonce reuse
 - Timing side-channels on secret comparison
 - Misuse of crypto primitives (ECB mode, unauthenticated encryption, static IVs, etc.)
@@ -76,8 +73,7 @@ Hunt logic errors by hand: standard scanners cannot find them, and they yield hi
 
 **Feature abuse and data leakage** (subagent_type: `general`)
 Legitimate features used for unintended purposes. Look for bugs in the design, not only in the code:
-- **Export/backup as exfil
-tration**: Can a low-privilege user trigger an export, snapshot, or backup that includes data above their access level? Can they export other users' data? Does the export include deleted/draft/private content? Revision history that was supposed to be pruned?
+- **Export/backup as exfiltration**: Can a low-privilege user trigger an export, snapshot, or backup that includes data above their access level? Can they export other users' data? Does the export include deleted/draft/private content? Revision history that was supposed to be pruned?
 - **Import/restore as injection**: Can import overwrite existing data? Can it create records that bypass normal validation? Can it inject content into collections the user has no write access to? Does it respect the same permission model as the UI?
 - **Search/filter/sort as oracle**: Can search queries reveal whether content exists that the user cannot directly access? Do filter parameters let users probe statuses, roles, or fields they should not know about? Does sorting by a hidden field reveal its values through result ordering?
 - **Enumeration through side effects**: Do error messages differ between "does not exist" and "no access"? Do response times differ? Response sizes? HTTP status codes? Can you enumerate users through password reset, invite, or registration flows?
@@ -87,8 +83,7 @@ tration**: Can a low-privilege user trigger an export, snapshot, or backup that 
 **Chained vulnerabilities and trust boundaries** (subagent_type: `general`)
 Individually allowed or contained behavior can become a vulnerability when another component or lifecycle step relies on a stronger guarantee:
 - **Multi-step boundary failures**: Map what a low-privilege principal may read, write, invoke, and retain, then connect only concrete outputs to later trust decisions. Confirm each prerequisite and do not assume a downstream effect.
-- **Cross-component trust gaps**: Co
-mponent A validates input and passes it to component B. Compare the exact guarantee A produces with what B assumes, including truncation, type coercion, normalization, tenant scope, and plugin/extension access.
+- **Cross-component trust gaps**: Component A validates input and passes it to component B. Compare the exact guarantee A produces with what B assumes, including truncation, type coercion, normalization, tenant scope, and plugin/extension access.
 - **Second-order use**: Data safe when stored may become dangerous in a later context. A field name becomes a JSON path, a slug becomes a file path, escaped text enters raw rendering, or a stored string becomes a URL, regex, template, or policy expression.
 - **Scope and capability growth**: Token, API-key, plugin, OAuth, MCP, or AI capabilities become broader after delegation, refresh, caching, role change, or composition. Name the concrete operation the resulting principal should not have.
 - **Timing and ordering**: Review setup, migration, soft-delete, revoke/cache expiry, check/use, and validate/consume windows. Confirm stale state is accepted before reporting.
@@ -103,8 +98,7 @@ Use these starting points, but do not limit yourself to them:
 - What is the strangest code in the codebase? Why does it exist? What happens if it is abused?
 - Are there any features that feel half-finished, experimental, or bolted on? Those have the weakest security because they got the least review.
 - What happens if you use the API in a way the frontend never would? The UI constrains users, but the API does not. What API calls are possible but never made by the client?
-- Are there any hidden or undocumented endpoints, parameters, headers, or features? Look at rou
-te registrations, middleware, and config for things that are not in the docs.
+- Are there any hidden or undocumented endpoints, parameters, headers, or features? Look at route registrations, middleware, and config for things that are not in the docs.
 - What happens when you mix features that were not designed to work together? Localization + preview + caching. Import + plugins + webhooks. OAuth + impersonation + API keys.
 - Is there anything interesting in the git history? Reverted security fixes, commented-out auth checks, secrets that were committed then removed (still in history).
 - Which valid-account actions affect other users, shared integrity, availability, or operator-owned cost? Verify containment, quotas, authorization, and recovery around those actions.
@@ -118,8 +112,7 @@ Pursue anomalies inside your assigned scope until the invariant is settled. If s
 Other agents hunt subtle bugs. This agent checks the basic exposures that are easy to overlook because everyone assumes someone else already checked them:
 - Are there any hardcoded passwords, API keys, tokens, or secrets in the source? (grep for `password`, `secret`, `apikey`, `token`, `Bearer`, `-----BEGIN`, common default passwords)
 - Are there any TODO/FIXME/HACK/XXX comments that reference security? (`TODO: add auth`, `FIXME: validate input`, `HACK: skip permission check`)
-- Is debug mode / dev mode properly gated? Can it be enabled in production v
-ia environment variable, query parameter, or header?
+- Is debug mode / dev mode properly gated? Can it be enabled in production via environment variable, query parameter, or header?
 - Are there test/example/seed credentials that work in production?
 - Is there a `/debug`, `/admin`, `/test`, `/status`, `/health`, `/metrics`, `/env`, `/.env`, `/config` endpoint that is unprotected?
 - Are there any `.env`, `.env.local`, `credentials.json`, `*.pem`, `*.key` files checked into the repo?

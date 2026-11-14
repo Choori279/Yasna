@@ -27,8 +27,7 @@ Checks the three places a category is defined against each other: the `{ id, tit
 
 Nothing at runtime can do any of this: the workflow has no filesystem access, so it cannot read either file, and a sweep handed a bad definition only reports it after the run has started.
 
-The corpus states what the plugin detects; the seeds are what goes looking. They drifted apart silently once already: **8 of 18 documented examples matched no seed in any category**, including `getenv(K, "default")`, the most common shape in 
-Python. Nothing in the workflow could notice: a pattern that matches nothing returns the same empty result as a clean repo.
+The corpus states what the plugin detects; the seeds are what goes looking. They drifted apart silently once already: **8 of 18 documented examples matched no seed in any category**, including `getenv(K, "default")`, the most common shape in Python. Nothing in the workflow could notice: a pattern that matches nothing returns the same empty result as a clean repo.
 
 Matching goes through `grep -E`, not JS RegExp, because the seeds are POSIX ERE (`[[:space:]]` has no JS equivalent), so this exercises them the way an agent running `grep -rE` would.
 
@@ -56,8 +55,7 @@ What it does **not** test: whether the prompts elicit good behaviour from a real
 
 ## The `--self-test` mode, and why it exists
 
-A test suite that has s
-ilently stopped checking anything reports success forever. So `--self-test` mutates the workflow source in memory and asserts the scenarios **fail** for each mutation. A sample:
+A test suite that has silently stopped checking anything reports success forever. So `--self-test` mutates the workflow source in memory and asserts the scenarios **fail** for each mutation. A sample:
 
 | Mutation | Should break |
 |---|---|
@@ -82,8 +80,7 @@ ilently stopped checking anything reports success forever. So `--self-test` muta
 | Zero-scanned guard removed | `search-failed` status |
 | Seed-only detection disabled | `seed_only_sweeps` reporting |
 | Verify downgraded off Opus in `MODELS` | per-phase model pinning |
-| Unconditional branch dr
-opped from the ladder | config-free findings staying in scope |
+| Unconditional branch dropped from the ladder | config-free findings staying in scope |
 
 Every mutation is caught, and a mutation that matches nothing is itself a failure. Otherwise a renamed variable, or reformatted code, would quietly turn a mutation into a no-op and the self-test would pass while checking nothing. That has already fired three times in practice: once when a mutated phrase also appeared in `meta.whenToUse` and got replaced there instead, once when the corpus-scoping line changed shape, and once when the verify agent's options were collapsed onto one line.
 

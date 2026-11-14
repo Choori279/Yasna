@@ -81,8 +81,7 @@ const PRIOR_STATUSES = new Set([
 ]);
 const FINGERPRINT_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$/;
 const AGENT_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,63}$/;
-cons
-t WINDOWS_RESERVED_AGENT_ID = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/;
+const WINDOWS_RESERVED_AGENT_ID = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/;
 const VISIBLE_CONTENT = /[^\p{White_Space}\p{Cc}\p{Cf}\p{Default_Ignorable_Code_Point}]/u;
 const PATH_FORBIDDEN_CHARACTER = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}\p{Default_Ignorable_Code_Point}]/u;
 const WINDOWS_RESERVED_COMPONENT = /^(?:con|prn|aux|nul|clock\$|conin\$|conout\$|com[1-9\u00b9\u00b2\u00b3]|lpt[1-9\u00b9\u00b2\u00b3])(?:\.|$)/iu;
@@ -127,8 +126,7 @@ function createErrorList() {
     value(...messages) {
       const remaining = LIMITS.validationErrors - this.length;
       if (remaining > 0) {
-        Array.prototype.push.apply(this, messages.slice(0, remaining).map(es
-capeUnsafeDiagnosticCharacters));
+        Array.prototype.push.apply(this, messages.slice(0, remaining).map(escapeUnsafeDiagnosticCharacters));
       }
       return this.length;
     },
@@ -198,8 +196,7 @@ function preflightJsonText(contents) {
     } else {
       beginValue();
     }
-    inSt
-ring = true;
+    inString = true;
   }
 
   function beginContainer(type) {
@@ -258,8 +255,7 @@ ring = true;
       closeContainer("object");
     } else if (character === ":") {
       const container = currentContainer();
-      if (!container
- || container.type !== "object" || container.state !== "colon") {
+      if (!container || container.type !== "object" || container.state !== "colon") {
         fail("has malformed JSON object structure");
       }
       container.state = "value";
@@ -313,8 +309,7 @@ function preflightDocument(root) {
       errors.push(`${location}: exceeds ${LIMITS.objectFields} object fields`);
       return errors;
     }
-    for (let index = keys.length - 1; index >= 0; 
-index--) {
+    for (let index = keys.length - 1; index >= 0; index--) {
       const key = keys[index];
       stack.push({ value: value[key], depth: depth + 1, location: `${location}{${index}}` });
     }
@@ -374,8 +369,7 @@ function canonicalCoverageId(refs) {
   if (!isObject(refs)) throw new TypeError("canonical_refs must be an object");
   const fields = hasOwn(refs, "lifecycle") ? [...REF_FIELDS, "lifecycle"] : REF_FIELDS;
   if (Object.keys(refs).length !== fields.length || fields.some((field) => !hasOwn(refs, field))) {
-    throw new TypeError("canonical_refs has missing or 
-unexpected fields");
+    throw new TypeError("canonical_refs has missing or unexpected fields");
   }
   return fields.map((field) => encodeCanonicalRef(refs[field])).join("::");
 }
@@ -418,8 +412,7 @@ function validateStringArray(value, location, errors, options = {}) {
     if (!valid) errors.push(`${entryLocation}: invalid ${pathValue ? "repository-relative path" : "text"}`);
     if (fingerprint && typeof entry === "string" && !FINGERPRINT_PATTERN.test(entry)) {
       errors.push(`${entryLocation}: invalid fingerprint`);
-    
-}
+    }
     if (typeof entry === "string" && seen.has(entry)) errors.push(`${entryLocation}: duplicate entry`);
     if (typeof entry === "string") seen.add(entry);
   });
@@ -454,7 +447,6 @@ function validateChecks(value, location, errors) {
     } else if (check.method !== "source" && check.method !== "local" && check.artifact !== null && !isSafeRelativePath(check.artifact)) {
       errors.push(`${base}.artifact: expected null or a safe output-relative path`);
     }
-
   });
 }
 
@@ -507,7 +499,6 @@ function semanticKey(unit) {
 }
 
 function hasValidSemanticFields(unit) {
-
   return ["surface", "boundary", "subsystem", "attack_class"].every((field) => isVisibleText(unit[field])) &&
     (!hasOwn(unit, "lifecycle") || isVisibleText(unit.lifecycle));
 }
@@ -557,8 +548,7 @@ function validateStateInvariants(unit, base, errors) {
       requireOwner();
       requireNonemptyArray(unit, "reviewed_paths", base, errors);
       requireNonemptyArray(unit, "local_checks", base, errors);
- 
-     requireNonemptyArray(unit, "unresolved", base, errors);
+      requireNonemptyArray(unit, "unresolved", base, errors);
       break;
     case "covered":
       requireOwner();
@@ -606,8 +596,7 @@ function validateAttempts(value, unit, base, errors) {
     if (!ATTEMPT_STATUSES.has(attempt.status)) {
       errors.push(`${attemptBase}.status: expected "covered", "candidate", or "blocked"`);
     }
-    let hasFreshOwner = fal
-se;
+    let hasFreshOwner = false;
     if (!isSafeAgentId(attempt.agent_id)) {
       errors.push(`${attemptBase}.agent_id: archived attempt requires a canonical lowercase agent ID`);
     } else if (priorOwners.has(attempt.agent_id)) {
@@ -642,8 +631,7 @@ se;
     errors.push(`${base}.agent_id: current assignment owner must be fresh after reassignment`);
   }
   if (Array.isArray(unit.local_checks)) {
-    unit.local_checks.forEach((c
-heck, index) => {
+    unit.local_checks.forEach((check, index) => {
       if (!isObject(check)) return;
       if (priorOwners.has(check.agent_id)) {
         errors.push(`${base}.local_checks[${index}].agent_id: prior assignment owner evidence must remain in its archived attempt`);
@@ -685,8 +673,7 @@ function collectUnitErrors(unit, index) {
     }
     if (hasOwn(unit, "lifecycle") !== hasOwn(unit.canonical_refs, "lifecycle")) {
       errors.push(`${base}: lifecycle and canonical_refs.lifecycle must appear together`);
-  
-  }
+    }
     try {
       expectedId = canonicalCoverageId(unit.canonical_refs);
     } catch {
@@ -721,8 +708,7 @@ function collectUnitErrors(unit, index) {
 
   validateAttempts(unit.attempts, unit, base, errors);
   validateStringArray(unit.reviewed_paths, `${base}.reviewed_paths`, errors, { pathValue: true });
-  validateChecks(unit.local_checks, `${base}.local_checks
-`, errors);
+  validateChecks(unit.local_checks, `${base}.local_checks`, errors);
   validateReviewedPathOwnership(unit, base, errors);
   validateStringArray(unit.result_fingerprints, `${base}.result_fingerprints`, errors, { fingerprint: true });
   validateStringArray(unit.unresolved, `${base}.unresolved`, errors);
@@ -775,8 +761,7 @@ function readFileWithinLimit(file) {
 function validateDocument(ledger) {
   const errors = createErrorList();
   if (!Array.isArray(ledger)) {
-    errors.push(
-"$: expected a top-level array");
+    errors.push("$: expected a top-level array");
     return errors;
   }
   if (ledger.length > MAX_UNITS) {
@@ -830,8 +815,7 @@ function run(file) {
   try {
     contents = readFileWithinLimit(file);
   } catch (error) {
-    const reason
- = error instanceof SafeInputError ? error.message : "input could not be opened or read safely";
+    const reason = error instanceof SafeInputError ? error.message : "input could not be opened or read safely";
     console.error(`Failed to read coverage ledger: ${reason}`);
     return 1;
   }
@@ -856,6 +840,33 @@ function run(file) {
     errors = validateDocument(ledger);
   } catch {
     console.error("Failed to validate coverage ledger: unexpected validation error");
-    ret
+    return 1;
+  }
+  for (const message of errors) console.error("ERROR:", message);
+  if (errors.length > 0) {
+    const cap = errors.length === LIMITS.validationErrors ? `; output capped at ${LIMITS.validationErrors}` : "";
+    console.error(`FAIL: ${errors.length} validation error(s)${cap}`);
+    return 1;
+  }
+  console.log(`PASS: ${ledger.length} coverage units valid`);
+  return 0;
+}
 
-... [Content truncated]
+module.exports = {
+  LIMITS,
+  PATH_FORBIDDEN_CHARACTER,
+  UNSAFE_DIAGNOSTIC_CHARACTER,
+  VISIBLE_CONTENT,
+  WINDOWS_RESERVED_COMPONENT,
+  canonicalCoverageId,
+  encodeCanonicalRef,
+  hasVisibleProse,
+  isSafeAgentId,
+  isSafeRelativePath,
+  preflightJsonText,
+  readFileWithinLimit,
+  safeQuote,
+  validateDocument,
+};
+
+if (require.main === module) process.exit(run(process.argv[2]));

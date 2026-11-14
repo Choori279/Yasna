@@ -40,8 +40,7 @@ Before reaching for controls, spend five minutes thinking like an attacker:
 - [ ] Session expiration configured (reasonable max-age)
 - [ ] Rate limiting on login endpoint (≤10 attempts per 15 minutes)
 - [ ] Password reset tokens: time-limited (≤1 hour), single-use
-- [ ] Account loc
-kout after repeated failures (optional, with notification)
+- [ ] Account lockout after repeated failures (optional, with notification)
 - [ ] MFA supported for sensitive operations (optional but recommended)
 
 ## Authorization
@@ -82,8 +81,7 @@ async function resolveDeletable(candidate: string, expectedOwner: string) {
   const target = await realpath(resolve(candidate)); // symlinks resolved BEFORE the check
   const inRoot = ALLOWED_ROOTS.some((root) => {
     const rel = relative(root, target);
-    // `rel === '..'` / `'../'` only — a plain `startsWith('..')`
- would also
+    // `rel === '..'` / `'../'` only — a plain `startsWith('..')` would also
     // reject a legitimate child named `..cache`.
     if (rel === '' || rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) return false;
     return rel.split(sep).length >= MIN_DEPTH;
@@ -136,8 +134,7 @@ cors({ origin: '*' })  // Allows any origin
 ## Data Protection
 
 - [ ] Sensitive fields excluded from API responses (`passwordHash`, `resetToken`, etc.)
-- [ ] Sensitive data not 
-logged (passwords, tokens, full CC numbers)
+- [ ] Sensitive data not logged (passwords, tokens, full CC numbers)
 - [ ] PII encrypted at rest (if required by regulation)
 - [ ] HTTPS for all external communication
 - [ ] Database backups encrypted
@@ -165,8 +162,7 @@ Never discover dependency lifecycle scripts by first executing an ordinary insta
 1. Bootstrap with dependency scripts disabled, or with a documented default-deny policy plus fail-closed enforcement.
 2. Inspect the exact script source and package version before approval.
 3. Record the narrowest native allow/deny policy at the installation boundary and commit it.
-4. Run
- a clean frozen/immutable install with that policy and verify the required packages still build.
+4. Run a clean frozen/immutable install with that policy and verify the required packages still build.
 
 **Point-in-time snapshot:** Package-manager defaults and command names change quickly. Verify this matrix against the pinned client's current official documentation before relying on it.
 
@@ -180,8 +176,7 @@ Never discover dependency lifecycle scripts by first executing an ordinary insta
 | pnpm 10.1–10.25 | `pnpm approve-builds` records the legacy lists; enable `strictDepBuilds` where supported (10.3+). |
 | Older or unknown pnpm | Bootstrap with `pnpm install --frozen-lockfile --ignore-scripts`. Keep scripts disabled unless the pinned version documents an enforceable policy. |
 | Yarn 4.14+ | Dependency postinstalls are disabled by default. Grant only required exceptions with top-level `dependenciesMeta.<package>.built: true`. |
-| Yarn 2–4.13 | Set `enableScripts: false` in `.yarnrc.yml`, the
-n grant only required exceptions with top-level `dependenciesMeta.<package>.built: true`; do not enable scripts globally. |
+| Yarn 2–4.13 | Set `enableScripts: false` in `.yarnrc.yml`, then grant only required exceptions with top-level `dependenciesMeta.<package>.built: true`; do not enable scripts globally. |
 | Yarn 1 | Bootstrap with `yarn install --ignore-scripts`; keep scripts disabled unless each required exception is reviewed under the pinned client's documented workflow. |
 
 Authoritative checks: [npm install-scripts](https://docs.npmjs.com/cli/v11/commands/npm-install-scripts/), [install policy](https://docs.npmjs.com/cli/v11/commands/npm-install/), and [CLI releases](https://github.com/npm/cli/releases); [pnpm approve-builds](https://pnpm.io/cli/approve-builds) and [build settings](https://pnpm.io/settings#allowbuilds); [Yarn security](https://yarnpkg.com/features/security) and [manifest](https://yarnpkg.com/configuration/manifest#dependenciesMeta).
@@ -201,8 +196,7 @@ For any feature that calls an LLM (chatbots, summarizers, agents, RAG):
 - [ ] Model output treated as untrusted — never into `eval`/SQL/shell/`innerHTML`/file paths
 - [ ] Prompt injection assumed; permissions enforced in code, not in the system prompt
 - [ ] Secrets, cross-tenant data, and full system prompts kept out of the context window
-- [ ] Tool/agent permissions scoped; destructive or irreversible actions require confirmat
-ion
+- [ ] Tool/agent permissions scoped; destructive or irreversible actions require confirmation
 - [ ] Token, rate, and recursion/loop limits set (bound consumption)
 
 ## Error Handling
@@ -247,8 +241,7 @@ For apps with LLM features. See the [OWASP GenAI Security Project](https://genai
 | LLM03 | Supply Chain | Vet models, datasets, and plugins like any dependency |
 | LLM04 | Data and Model Poisoning | Use trusted model sources, verify integrity; vet fine-tuning and RAG data |
 | LLM05 | Improper Output Handling | Treat model output as untrusted; validate, parameterize, encode |
-| LLM06 
-| Excessive Agency | Scope tool permissions; confirm destructive actions |
+| LLM06 | Excessive Agency | Scope tool permissions; confirm destructive actions |
 | LLM07 | System Prompt Leakage | Assume the system prompt can leak; put no secrets in it |
 | LLM08 | Vector and Embedding Weaknesses | Partition RAG embeddings per tenant; validate documents before indexing |
 | LLM09 | Misinformation | Ground answers with citations; validate critical claims; keep a human in the loop |

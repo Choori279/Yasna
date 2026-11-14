@@ -60,8 +60,7 @@ WorktreeManager.createSessionWorktree(projectDir, sessionId)
 **Where did empty string come from?**
 ```typescript
 const context = setupCoreTest(); // Returns { tempDir: '' }
-Project.create('name', context.tempDir); // Accessed 
-before beforeEach!
+Project.create('name', context.tempDir); // Accessed before beforeEach!
 ```
 
 ## Adding Stack Traces
@@ -136,8 +135,7 @@ digraph principle {
     "Can trace one level up?" [shape=diamond];
     "Trace backwards" [shape=box];
     "Is this the source?" [shape=diamond];
-    "F
-ix at source" [shape=box];
+    "Fix at source" [shape=box];
     "Add validation at each layer" [shape=box];
     "Bug impossible" [shape=doublecircle];
     "NEVER fix just the symptom" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];

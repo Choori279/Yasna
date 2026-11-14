@@ -19,8 +19,7 @@ Use `CLIENT-SIDE.md` for browser-side webview behavior, `MEMORY-SAFETY-AND-BINAR
 ## Deep-link, callback, and navigation attack classes (subagent_type: `general`)
 
 **Custom-scheme and deep-link ambiguity**
-Another app or page can invoke a route that mutates state, imports data, completes authentication, or selects an account without a current-sessio
-n and one-time callback binding. Review URI normalization, duplicate query fields, scheme/host/path matching, exported activity/handler policy, and stale/replayed links.
+Another app or page can invoke a route that mutates state, imports data, completes authentication, or selects an account without a current-session and one-time callback binding. Review URI normalization, duplicate query fields, scheme/host/path matching, exported activity/handler policy, and stale/replayed links.
 
 **App and account handoff confusion**
 OAuth, SSO, magic-link, invite, device pairing, passwordless, or payment callbacks return to the wrong installed app, profile, tenant, or pending transaction. Bind state to the initiating app identity, current session, account, provider, operation, and expiry.
@@ -42,8 +41,7 @@ Remote content can read app-local files, privileged custom schemes, or internal 
 ## Local IPC and exported-component attack classes (subagent_type: `general`)
 
 **IPC peer-authentication gaps**
-Unix sockets, named pipes, XPC, Binder, D-Bus, native messaging, RPC, shared memory
-, or loopback listeners accept a lower-trust peer without checking OS credentials, code identity, sandbox token, or channel ownership. Require a meaningful method or disclosure behind the channel.
+Unix sockets, named pipes, XPC, Binder, D-Bus, native messaging, RPC, shared memory, or loopback listeners accept a lower-trust peer without checking OS credentials, code identity, sandbox token, or channel ownership. Require a meaningful method or disclosure behind the channel.
 
 **Claimed principal versus channel identity**
 The authenticated process/channel belongs to one app or user, but request fields select another user, tenant, profile, or capability. Bind each method and resource to the peer credential rather than a caller-declared identifier.
@@ -63,8 +61,7 @@ A low-privilege caller can select a privileged command, file, service, user, or 
 A privileged installer/helper reads manifests, scripts, packages, symlinks, working directories, or repair state writable by a lower-trust actor after authorization. Bind authorization to immutable content and safe destination paths.
 
 **Local file ownership and TOCTOU**
-The app checks a file/path then follows replacement, symlink, mount, or case/normalization changes during a privileged read/write. Use descriptor-re
-lative operations and verify final ownership. Focus `MEMORY-SAFETY-AND-BINARY.md` on parsing after the file is opened.
+The app checks a file/path then follows replacement, symlink, mount, or case/normalization changes during a privileged read/write. Use descriptor-relative operations and verify final ownership. Focus `MEMORY-SAFETY-AND-BINARY.md` on parsing after the file is opened.
 
 **Credential-store and local-secret boundary mismatch**
 A keychain/keystore item, token file, backup, log, clipboard, notification preview, or local config is readable by another app/profile/user with less authority. Plaintext readable only by the same intended OS account is not automatically a vulnerability; state the lower-trust reader and credential power.
@@ -85,8 +82,7 @@ Notification, widget, shortcut, share sheet, biometric prompt, or deferred opera
 
 ## Validation rules (apply before reporting ANY finding here)
 
-1. Name the attacker starting capability, OS/app principal crossed, entry channel, accepted argument or state, and unauthorized operation or disclosur
-e.
+1. Name the attacker starting capability, OS/app principal crossed, entry channel, accepted argument or state, and unauthorized operation or disclosure.
 2. Confirm OS sandbox, peer credential, signing, entitlement, permission, user-consent, and installer controls that apply. Unknown packaging/runtime facts require `needs_validation`.
 3. For webview bridges, cite both navigation/origin control and privileged native sink. For IPC, cite peer authentication and per-resource authorization. For helpers, verify final normalized destination.
 4. Keep local tests bounded and use dummy content/accounts. Stop after proving the boundary result; do not extend proof into persistence or broader system modification.

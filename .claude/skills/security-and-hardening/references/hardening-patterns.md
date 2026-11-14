@@ -61,8 +61,7 @@ const clean = DOMPurify.sanitize(userInput);
 
 ### Broken Access Control
 
-```t
-ypescript
+```typescript
 // Always check authorization, not just authentication
 app.patch('/api/tasks/:id', authenticate, async (req, res) => {
   const task = await taskService.findById(req.params.id);
@@ -132,8 +131,7 @@ Any time the server fetches a URL the user influenced — webhooks, "import from
 // BAD: fetch whatever the user gives you
 await fetch(req.body.webhookUrl);
 
-// GOOD: allowlist sc
-heme + host, reject if ANY resolved IP is private, forbid redirects
+// GOOD: allowlist scheme + host, reject if ANY resolved IP is private, forbid redirects
 import { lookup } from 'node:dns/promises';
 import ipaddr from 'ipaddr.js';
 
@@ -184,8 +182,7 @@ app.post('/api/tasks', async (req, res) => {
       },
     });
   }
-  // result.d
-ata is now typed and validated
+  // result.data is now typed and validated
   const task = await taskService.create(result.data);
   return res.status(201).json(task);
 });
@@ -215,8 +212,7 @@ A delete, move, or overwrite is only as safe as the value that names its target.
 
 Before a destructive call, require all three: the resolved target sits under an **allowlisted root** (compare after resolving symlinks, never on the raw string); it is at least one level **below** that root, so a root is never itself the target; and it carries **evidence that it is yours**, read *before* the operation and before any teardown that removes it — otherwise "absent" and "not mine" are indistinguishable. On refusal, log the rejected target and stop: a cleanup that falls back to a broader default path is the failure this guards against. Worked example in `security-checklist.md#destructive-path-operations`.
 
-Two limits, because the check reads stronger than it is. A marker inside the tree is self-attestation — anything that can write there can write the marker — so the expected owner has to come from authenticated state, and the mark
-er needs integrity protection (restrictive ownership, or a MAC) before it counts as authorization. And resolving a path and then operating on the *name* is a check/use race wherever an untrusted process can swap an ancestor: on a shared volume, hold the target by descriptor and use no-follow, beneath-the-root operations, or make sure the hierarchy cannot change for the duration.
+Two limits, because the check reads stronger than it is. A marker inside the tree is self-attestation — anything that can write there can write the marker — so the expected owner has to come from authenticated state, and the marker needs integrity protection (restrictive ownership, or a MAC) before it counts as authorization. And resolving a path and then operating on the *name* is a check/use race wherever an untrusted process can swap an ancestor: on a shared volume, hold the target by descriptor and use no-follow, beneath-the-root operations, or make sure the hierarchy cannot change for the duration.
 
 ## Dependency Audit Triage
 
@@ -259,8 +255,7 @@ app.use('/api/', rateLimit({
 }));
 
 // Stricter limit for auth endpoints
-app.use('/api/auth/
-', rateLimit({
+app.use('/api/auth/', rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,  // 10 attempts per 15 minutes
 }));
@@ -308,8 +303,7 @@ git diff --cached -i -G'password|secret|api_key|token' --name-only
 
 ## Data Classification
 
-Classify personal data as you add fields, so export and d
-eletion requests can find it later:
+Classify personal data as you add fields, so export and deletion requests can find it later:
 
 | Class | Examples | Handling |
 |---|---|---|

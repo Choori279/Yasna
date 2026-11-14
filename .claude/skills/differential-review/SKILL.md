@@ -38,8 +38,7 @@ Security-focused code review for PRs, commits, and diffs.
 
 | Codebase Size | Strategy | Approach |
 |---------------|----------|----------|
-| SMALL (<20 files) | DEE
-P | Read all deps, full git blame |
+| SMALL (<20 files) | DEEP | Read all deps, full git blame |
 | MEDIUM (20-200) | FOCUSED | 1-hop deps, priority files |
 | LARGE (200+) | SURGICAL | Critical paths only |
 
@@ -100,8 +99,7 @@ adversarial methodology (attacker model, attack vectors, exploitability rating,
 exploit scenario, baseline cross-reference) and produces structured vulnerability
 reports. Delegate to this agent when Phase 5 analysis is needed on high-risk
 changes, passing that full namespaced name as `subagent_type` — a bare
-`adversarial-modeler` is 
-unregistered and the dispatch fails at runtime.
+`adversarial-modeler` is unregistered and the dispatch fails at runtime.
 
 ---
 
@@ -184,8 +182,7 @@ For these cases, use standard code review instead.
 
 **Immediate escalation triggers:**
 - Removed code from "security", "CVE", or "fix" commits
-- Access control modifiers removed (on
-lyOwner, internal → external)
+- Access control modifiers removed (onlyOwner, internal → external)
 - Validation removed without replacement
 - External calls added without checks
 - High blast radius (50+ callers) + HIGH risk change

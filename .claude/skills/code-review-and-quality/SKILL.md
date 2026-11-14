@@ -39,8 +39,7 @@ Can another engineer (or agent) understand this code without the author explaini
 
 - Are names descriptive and consistent with project conventions? (No `temp`, `data`, `result` without context)
 - Is the control flow straightforward (avoid nested ternaries, deep callbacks)?
-- Is the code organized 
-logically (related code grouped, clear module boundaries)?
+- Is the code organized logically (related code grouped, clear module boundaries)?
 - Are there any "clever" tricks that should be simplified?
 - **Could this be done in fewer lines?** (1000 lines where 100 suffice is a failure)
 - **Are abstractions earning their complexity?** (Don't generalize until the third use case)
@@ -60,8 +59,7 @@ Does the change fit the system's design?
 - Is the abstraction level appropriate (not over-engineered, not too coupled)?
 - **Does this refactor reduce complexity or just relocate it?** Count the concepts a reader must hold to follow the change. If a "cleaner" version leaves that count unchanged, it isn't cleaner — prefer the restructuring that makes whole branches, modes, or layers disappear over one that re-centralizes the same logic. Prefer deleting an abstraction to polishing it.
 - **Is feature-specific logic leaking into a shared or general-purpose module?** Keep logic in its owning layer, reuse the existing canonical helper instead of a near-duplicate, and don't normalize architectural drift.
-- **Are type boundaries explicit?** Question gratuitous `any`/`unknown`/optional/casts and silent fallbacks that paper over an unclear invariant — making the boundary explicit often makes th
-e surrounding control flow simpler.
+- **Are type boundaries explicit?** Question gratuitous `any`/`unknown`/optional/casts and silent fallbacks that paper over an unclear invariant — making the boundary explicit often makes the surrounding control flow simpler.
 
 ### 4. Security
 
@@ -102,8 +100,7 @@ When you flag a structural problem, propose the move — not just the problem. A
 
 Prefer the remedy that removes moving pieces over one that spreads the same complexity around.
 
-## Cha
-nge Sizing
+## Change Sizing
 
 Small, focused changes are easier to review, faster to merge, and safer to deploy. Target these sizes:
 
@@ -134,8 +131,7 @@ Small, focused changes are easier to review, faster to merge, and safer to deplo
 
 Every change needs a description that stands alone in version control history.
 
-**First line:** Short, imperative, standalone. "Delete the FizzBuzz RPC" not "Deleting the FizzBuzz RPC." Must
- be informative enough that someone searching history can understand the change without reading the diff.
+**First line:** Short, imperative, standalone. "Delete the FizzBuzz RPC" not "Deleting the FizzBuzz RPC." Must be informative enough that someone searching history can understand the change without reading the diff.
 
 **Body:** What is changing and why. Include context, decisions, and reasoning not visible in the code itself. Link to bug numbers, benchmark results, or design docs where relevant. Acknowledge approach shortcomings when they exist.
 
@@ -184,8 +180,7 @@ For each file changed:
 
 Before reporting a finding, check it against the callers, guards and tests that reach the changed code, and drop it if they rule it out. Label defects that already exist in the base separately from regressions this change introduces. Zero findings is a valid result; do not invent one.
 
-Label every co
-mment with its severity so the author knows what's required vs optional:
+Label every comment with its severity so the author knows what's required vs optional:
 
 | Prefix | Meaning | Author Action |
 |--------|---------|---------------|
@@ -241,8 +236,7 @@ Flag any issues as Critical, Required, Optional, or Nit.
 
 After any refactoring or implementation change, check for orphaned code:
 
-1. Identify code that is now unreachable or unus
-ed
+1. Identify code that is now unreachable or unused
 2. List it explicitly
 3. **Ask before deleting:** "Should I remove these now-unused elements: [list]?"
 
@@ -281,8 +275,7 @@ When resolving review disputes, apply this hierarchy:
 When reviewing code — whether written by you, another agent, or a human:
 
 - **Don't rubber-stamp.** "LGTM" without evidence of review helps no one.
-- **Don't soften real issues.** "This might
- be a minor concern" when it's a bug that will hit production is dishonest.
+- **Don't soften real issues.** "This might be a minor concern" when it's a bug that will hit production is dishonest.
 - **Quantify problems when possible.** "This N+1 query will add ~50ms per item in the list" is better than "this could be slow."
 - **Push back on approaches with clear problems.** Sycophancy is a failure mode in reviews. If the implementation has issues, say so directly and propose alternatives.
 - **Accept override gracefully.** If the author has full context and disagrees, defer to their judgment. Comment on code, not people — reframe personal critiques to focus on the code itself.
@@ -305,8 +298,7 @@ Part of code review is dependency review:
 1. **Read the changelog, not just the version number.** Semver is a promise the maintainer may not have kept — a "patch" can carry a behavioral change. For a major bump, read the migration notes and find what breaks.
 2. **One dependency per change.** Upgrade and merge them individually (or in small related groups). When a bulk bump breaks the build, you've lost which package did it; a single-package change makes the cause obvious and the revert clean.
 3. **Let the tests decide.** The upgrade is verified by a green suite before *and* after, not by "it installed." If coverage around the dependency's behavior is thin, that gap is the real finding — add a test first.
-4. **Mind the transitive graph.** Most installed packages a
-re ones nobody chose directly. Review the lockfile diff, not just `package.json`; a single direct bump can pull in dozens of indirect changes.
+4. **Mind the transitive graph.** Most installed packages are ones nobody chose directly. Review the lockfile diff, not just `package.json`; a single direct bump can pull in dozens of indirect changes.
 5. **Keep the lockfile honest.** Commit it, review its diff, and never hand-edit it. The lockfile is the thing that actually pins what ships.
 
 For triaging `npm audit` findings and supply-chain risk (typosquatting, compromised maintainers), follow the `security-and-hardening` skill — this section covers the upgrade *workflow*, that one covers the security verdict.
@@ -367,8 +359,7 @@ For triaging `npm audit` findings and supply-chain risk (typosquatting, compromi
 
 | Rationalization | Reality |
 |---|---|
-| "It works, that's good enough" | Working code that's unreadable, insecure, or architectura
-lly wrong creates debt that compounds. |
+| "It works, that's good enough" | Working code that's unreadable, insecure, or architecturally wrong creates debt that compounds. |
 | "I wrote it, so I know it's correct" | Authors are blind to their own assumptions. Every change benefits from another set of eyes. |
 | "We'll clean it up later" | Later never comes. The review is the quality gate — use it. Require cleanup before merge, not after. |
 | "AI-generated code is probably fine" | AI code needs more scrutiny, not less. It's confident and plausible, even when wrong. |
@@ -390,8 +381,7 @@ lly wrong creates debt that compounds. |
 - Accepting "I'll fix it later" — it never happens
 - A refactor that moves code around without reducing the number of concepts a reader must hold
 - A change that grows an already-large file instead of decomposing it
-- New conditionals scattered into unrelated code paths (a missing 
-abstraction)
+- New conditionals scattered into unrelated code paths (a missing abstraction)
 - A bespoke helper that duplicates an existing canonical one, or feature logic placed in a shared module
 - A bulk "bump dependencies" PR with no changelog review and no per-package isolation
 - A lockfile change that's hand-edited, uncommitted, or merged without reviewing its diff

@@ -59,8 +59,7 @@ def bootstrap_admin():
 ```
 
 **Example/documentation credentials**: a credential appearing inside prose in `README.md`:
-```markdo
-wn
+```markdown
 ## Setup
 
 Configure your API key:

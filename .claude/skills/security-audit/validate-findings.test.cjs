@@ -50,8 +50,7 @@ function confirmed() {
     conditions: [],
     execution: {
       attacker_perspective: "An unprivileged remote user with their own account.",
-      payloads: ["An object identifier owned by
- another user."],
+      payloads: ["An object identifier owned by another user."],
       instructions: ["Submit the identifier through the public operation."],
       observed_result: "The other user's object changes.",
     },
@@ -102,8 +101,7 @@ function errorsFor(value) {
 function runCli(contents, options = {}) {
   const { nodeArgs = [], timeout = CLI_TIMEOUT_MS } = options;
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "validate-findings-"));
-  
-const findingsPath = path.join(directory, "findings.json");
+  const findingsPath = path.join(directory, "findings.json");
   try {
     fs.writeFileSync(findingsPath, contents);
     return spawnSync(process.execPath, [...nodeArgs, validatorPath, findingsPath], {
@@ -159,8 +157,7 @@ test("schema is an actual top-level array with exactly three branches", () => {
   const confirmedSchema = schema.items.oneOf[0].properties;
   assert.equal(confirmedSchema.title.visibleContent, true);
   assert.equal(confirmedSchema.execution.properties.payloads.items.minLength, undefined);
-  assert.equal(confirmedSchema.execution.properties.payloads.items.visibleContent, undefined
-);
+  assert.equal(confirmedSchema.execution.properties.payloads.items.visibleContent, undefined);
   assert.equal(confirmedSchema.remediation.properties.code_changes.items.properties.fixed_code.minLength, undefined);
 });
 
@@ -205,8 +202,7 @@ test("rejects empty required content", () => {
 });
 
 test("preserves exact payload and replacement-code strings", () => {
-  const finding = co
-nfirmed();
+  const finding = confirmed();
   const payloads = ["", " \t\r\n", "\u0000\u001f\u007f", "\u034f", "\ufe0f", "\ud800", "\udc00"];
   const fixedCode = "\u0000 \t\r\n\u001f\u007f\u034f\ufe0f\ud800x\udc00";
   finding.execution.payloads = payloads.slice();
@@ -244,8 +240,7 @@ test("quotes input-derived controls in direct validation values and paths", () =
   cyclic[`path-${TERMINAL_CONTROL_PAYLOAD}`] = cyclic;
   const output = [
     ...errorsFor([finding]),
-    ...collect(
-cyclic, { type: "object" }, "$input"),
+    ...collect(cyclic, { type: "object" }, "$input"),
   ].join("\n");
 
   for (const escaped of ["\\u001b", "\\u0007", "\\u0085", "\\u202e", "\\u034f", "\\ufe0f"]) {
@@ -288,8 +283,7 @@ test("rejects duplicate fingerprints and unique array entries", () => {
 
 test("uses canonical Set uniqueness for structured entries at the array limit", () => {
   const entries = Array.from({ length: LIMITS.arrayItems }, (_, id) => ({ id, label: String(id) }));
-  assert.deepEqual(collect(entries, { type: "arra
-y", uniqueItems: true }), []);
+  assert.deepEqual(collect(entries, { type: "array", uniqueItems: true }), []);
 
   const duplicate = entries.slice(0, -1);
   duplicate.push({ label: "0", id: 0 });
@@ -351,8 +345,7 @@ test("rejects unsafe source paths", () => {
     "src/CONOUT$.txt",
     "src/CLOCK$.txt",
     "src/COM\u00b9.log",
-    "src/LPT\u00b2
-.log",
+    "src/LPT\u00b2.log",
     "src /file.c",
     "src./file.c",
     "src/file.c ",
@@ -404,8 +397,7 @@ test("CLI rejects invalid UTF-8 without replacement or an exception trace", () =
   const output = cliOutput(result);
   assert.equal(result.status, 1, output);
   assert.match(output, /input is not valid UTF-8/);
-  assert.doesNotMatch(outp
-ut, /TypeError|stack|at validate-findings/i);
+  assert.doesNotMatch(output, /TypeError|stack|at validate-findings/i);
 });
 
 test("quotes input-derived controls in CLI validation errors", { skip: !HAS_SAFE_INPUT_OPEN }, () => {
@@ -455,8 +447,7 @@ test("CLI rejects lone-surrogate prose without changing payload semantics", () =
   findings[0].title = "\ud800";
   const result = runCli(JSON.stringify(findings));
   const output = cliOutput(result);
-  assert.equa
-l(result.status, 1, output);
+  assert.equal(result.status, 1, output);
   assert.match(output, /must contain only valid Unicode scalar values/);
   assert.doesNotMatch(output, /stack|at validate-findings/i);
 });
@@ -499,8 +490,7 @@ test("CLI rejects a symlink without following it", { skip: process.platform === 
   try {
     fs.writeFileSync(targetPath, JSON.stringify(producerShapedFindings()));
     fs.symlinkSync(targetPath, symlinkPath);
-   
- const result = spawnSync(process.execPath, [validatorPath, symlinkPath], {
+    const result = spawnSync(process.execPath, [validatorPath, symlinkPath], {
       encoding: "utf8",
       timeout: CLI_TIMEOUT_MS,
     });
@@ -541,8 +531,7 @@ test("checks pattern and branch invariants", () => {
 test("rejects unsupported and malformed schema keywords", () => {
   assert(collectSchemaErrors({ type: "string", format: "uuid" }).some((error) => error.includes("format")));
   assert(collectSchemaErrors({ type: "string", pattern: "[" }).some((error) => error.includes("regular expression")));
-  assert(collectSchemaErrors({ type: "string", visibleContent: "yes" })
-.some((error) => error.includes("expected boolean")));
+  assert(collectSchemaErrors({ type: "string", visibleContent: "yes" }).some((error) => error.includes("expected boolean")));
   assert(collectSchemaErrors({ type: "array", visibleContent: true }).some((error) => error.includes("requires type")));
   assert.notEqual(validateDocument([], { type: "array", maxItems: 1 }).length, 0);
 });
@@ -579,8 +568,7 @@ test("caps amplified in-limit findings output under a constrained Node heap", { 
   assert.equal(result.status, 1, output);
   assert.match(output, /output capped at 100/);
   assert(output.length < 20000, `unexpected output length ${output.length}`);
-  assert.doesNotMatch(output, /heap out of memory|allocation failed|RangeError|M
-aximum call stack/i);
+  assert.doesNotMatch(output, /heap out of memory|allocation failed|RangeError|Maximum call stack/i);
 });
 
 test("keeps shared helpers aligned with the coverage-ledger validator", () => {
@@ -643,8 +631,7 @@ test("keeps shared helpers aligned with the coverage-ledger validator", () => {
   assert.equal(ledgerModule.isSafeRelativePath("src/cloc\u212a$.txt"), false);
 
   const proseCorpus = [
-    "Va
-lid prose.",
+    "Valid prose.",
     "caf\u00e9",
     "",
     " \t\r\n",
