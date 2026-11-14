@@ -17,8 +17,9 @@ Présentation claire et complète du projet Yasna à destination des contributeu
 4. Solutions existantes  
 5. Opportunités et maturité du marché  
 6. Principes de sécurité et conformité  
-7. Stack technique et architecture  
-8. Roadmap produit et PoC  
+7. Chemin vers la production  
+8. Stack technique et architecture  
+9. Roadmap produit et PoC  
 
 ## 1. Postulat de départ
 
@@ -203,14 +204,36 @@ Pour les administrations de l'État, leurs opérateurs (article 31 de la loi SRE
 ### Autres exigences
 
 - Validation humaine obligatoire avant toute génération de script de modification de données (circuit de validation paramétrable par projet — cf. section 6, dossier de revue, journalisation).
-- **API externe configurable par défaut + mode local optionnel** (couche fournisseur interchangeable, cf. section 7).
+- **API externe configurable par défaut + mode local optionnel** (couche fournisseur interchangeable, cf. section 8).
 - Conteneurisation sécurisée (non-root, capabilities droppées, réseau isolé).
 - Pas de secrets en dur, validation stricte des entrées, headers de sécurité (via reverse proxy).
 - **Chat de cadrage** : seuls des documents projet non personnels (circulaires, SFD, STD, DEX…) y sont chargés ; ces documents transitent vers le fournisseur du LLM configuré. Aucune donnée personnelle (bénéficiaires…) ne doit y être saisie.
 - **Connexion BDD** : rôle PostgreSQL strictement lecture seule à l'analyse ; requêtes SELECT bornées (LIMIT / échantillonnage, timeout) et contrôlées de façon déterministe (cf. ci-dessus).
 - **Effets de bord SQL** : tout script de modification généré doit lister les triggers/contraintes impactés, classés en **réversibles par le rollback** / **non réversibles** (avec description de l'effet) ; un effet non réversible est signalé explicitement dans le dossier de revue. Le rollback doit être testable (transaction + sauvegarde préalable dans la même transaction que l'UPDATE). La table de backup contient des données personnelles : durée de conservation et suppression à prévoir (`À COMPLÉTER`).
 
-## 7. Stack technique et architecture
+## 7. Chemin vers la production
+
+Le passage à la production suit quatre étapes : **PoC sur données fictives → copie de recette → pré-production → production**.
+
+### Prérequis avant toute connexion à une base contenant des données réelles
+
+- **Homologation de sécurité (RGS)** de l'administration ;
+- accord du **DPO** ;
+- **AIPD** réalisée par l'administration ;
+- déploiement de Yasna **dans le réseau de l'administration** ;
+- **flux sortant** vers le fournisseur LLM **qualifié SecNumCloud** documenté et autorisé.
+
+### Kit d'homologation fourni par Yasna
+
+- **Schéma d'architecture** ;
+- **cartographie des flux de données** (ce qui part vers le LLM, ce qui reste) ;
+- **mesures de sécurité appliquées** (renvoi au référentiel ANSSI du dépôt) ;
+- **matrice des rôles et du circuit de validation** ;
+- **éléments pour l'AIPD**.
+
+Ce kit figure parmi les **livrables de la feuille de route** (cf. section 9).
+
+## 8. Stack technique et architecture
 
 - **Backend** : Python 3.12+ + FastAPI  
 - **Interface** : Streamlit derrière un **reverse proxy** (Caddy ou nginx : TLS, headers de sécurité)  
@@ -236,7 +259,7 @@ Respect d'une séparation claire des responsabilités (approche type MVC / Clean
 
 Structure modulaire recommandée : `core` / `rag` / `analysis` / `sql_generator` / `agents` / `llm` (couche fournisseur) / `db_adapters` / `api` / `ui`.
 
-## 8. Roadmap produit et PoC
+## 9. Roadmap produit et PoC
 
 **Objectif du PoC**  
 Démontrer la valeur de Yasna sur un périmètre réaliste et maîtrisable : **une table métier prioritaire** (exemple : table des bénéficiaires d'aides sociales), en déroulant le **parcours complet** : cadrage par la documentation projet + chat IA, initialisation du projet (avec validation du contexte figé par le Décideur et paramétrage du circuit de validation par l'Administrateur), connexion lecture seule, lien contexte métier ↔ BDD (y compris objets SQL), première analyse en suggestions, spécification du besoin, pipeline multi-agents (SELECT), puis proposition transmise au(x) Décideur(s), revue et génération des scripts UPDATE + rollback sur validation.  
@@ -250,7 +273,7 @@ La cartographie métier↔technique dédiée et la proposition de schéma optimi
 Voir le document dédié « PoC Yasna – Spécification détaillée » pour le détail des phases.  
 
 **Suite après le PoC**  
-Stabilisation ; **adaptateur pour un SGBD legacy (DB2 / Oracle) en priorité n° 1** (SGBD prioritaire : `À COMPLÉTER`) ; extension à d'autres tables et à d'autres SGBD (adaptateurs), pipeline multi-agents complet (4 agents), cartographie dédiée et refonte de schéma (3NF), renforcement de la sécurité/conformité, packaging Docker, amélioration du RAG et de l'audit trail.  
+Stabilisation ; adaptateur pour un SGBD legacy (DB2 / Oracle) en priorité n° 1 (SGBD prioritaire : `À COMPLÉTER`) ; extension à d'autres tables et à d'autres SGBD (adaptateurs), pipeline multi-agents complet (4 agents), cartographie dédiée et refonte de schéma (3NF), renforcement de la sécurité/conformité, packaging Docker, amélioration du RAG et de l'audit trail, **kit d'homologation** (cf. section 7).  
 
 ---
 
