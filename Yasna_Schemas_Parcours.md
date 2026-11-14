@@ -39,7 +39,7 @@ flowchart LR
         DB["PostgreSQL<br/>rôle lecture seule, GRANT SELECT limités<br/>schéma + stats agrégées + triggers"]
     end
 
-    SCRIPT["Scripts SQL téléchargés<br/>exécutés manuellement hors Yasna<br/>après validation du dossier de revue<br/>par le ou les Décideur(s)"]
+    SCRIPT["Dossier de changement téléchargé<br/>scripts UPDATE + rollback + fiche de changement<br/>exécuté manuellement hors Yasna<br/>après validation du dossier de revue<br/>par le ou les Décideur(s)"]
 
     DOCS --> UI
     UI <--> PROXY <--> API
@@ -229,7 +229,7 @@ flowchart TD
     D2 -- oui --> D3{"Révues décisionnelles<br/>selon le circuit paramétré<br/>(défaut : 1 Décideur,<br/>auto-validation interdite) ?"}
     D3 -- "refusée avec motif" --> P6
     D3 -- validée --> P9["Génération : WHERE du SELECT validé réutilisé (sqlglot),<br/>SET généré par le LLM, vérification par le code<br/>triggers classés réversibles / non réversibles<br/>rollback testable + contrôle de dérive + en-tête des scripts"]
-    P9 --> F2["Scripts téléchargés<br/>exécution manuelle hors Yasna<br/>sous la responsabilité de l'exécutant<br/>JAMAIS automatique"]
+    P9 --> F2["Dossier de changement téléchargé<br/>(scripts UPDATE + rollback + fiche de changement)<br/>exécution manuelle hors Yasna<br/>sous la responsabilité de l'exécutant<br/>JAMAIS automatique"]
 ```
 
 ---

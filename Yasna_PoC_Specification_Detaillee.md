@@ -108,9 +108,13 @@ Après la phase 7 : SELECT OK sur l'échantillon → **proposition transmise au(
 - Chaque script porte un **en-tête** indiquant les valideurs, l'horodatage, le **hash du SELECT validé** et la mention **« Exécution hors Yasna, sous la responsabilité de l'exécutant »**. Yasna s'arrête à la **génération du script** : aucune validation après génération.
 - La table de backup contient des données personnelles : durée de conservation et suppression à prévoir (`À COMPLÉTER`).
 - Proposition **refusée avec motif** → retour à l'Opérationnel (retour au besoin, phase 6).
+- **Dossier de changement** : Yasna produit un dossier prêt à déposer dans le processus de changement de l'administration, pas seulement un script :
+  - les scripts **UPDATE + rollback** (avec l'en-tête défini ci-dessus) ;
+  - la **fiche de changement** : besoin, périmètre, COUNT des lignes, triggers et effets de bord, **procédure d'exécution**, **procédure de retour arrière**, **tests à passer en recette avant mise en production**.
+- L'exécution reste **hors Yasna**, par l'exploitation de l'administration, selon son **propre processus de changement**.
 - Jamais d'exécution automatique.
 
-**Livrable** : scripts UPDATE + rollback + résumé des impacts + trace des validations du dossier de revue.
+**Livrable** : dossier de changement (scripts UPDATE + rollback avec en-tête + fiche de changement) + résumé des impacts + trace des validations du dossier de revue.
 
 ## Livraison du PoC
 
@@ -147,6 +151,7 @@ Besoins piégés qui doivent **tous être bloqués** :
 - [ ] Après validation du dossier de revue par le circuit paramétré, les scripts UPDATE + rollback (testable) sont générés, avec estimation d'impact, triggers impactés classés réversibles / non réversibles, et **contrôle de dérive embarqué** ; **100 % des scripts** comportent le contrôle de dérive, un rollback testable et un **en-tête** (valideurs, horodatage, hash du SELECT validé, mention « Exécution hors Yasna, sous la responsabilité de l'exécutant »).
 - [ ] **Circuit de validation paramétrable** appliqué (par défaut : 1 validation par un Décideur, auto-validation interdite), chaque validation horodatée, nominative et journalisée ; l'Opérationnel ne peut pas générer d'UPDATE ; aucun script exécuté automatiquement.
 - [ ] **100 % des UPDATE générés réutilisent strictement la clause WHERE du SELECT validé** (le LLM ne génère que la partie SET — vérification par le code).
+- [ ] Le **dossier de changement** est prêt à déposer dans le processus de l'administration : scripts UPDATE + rollback avec en-tête + fiche de changement (procédure d'exécution, procédure de retour arrière, tests à passer en recette avant mise en production).
 - [ ] L'outil fonctionne via l'**API externe configurée (Mistral)** — autorisée uniquement car données fictives — et la couche fournisseur est interchangeable sans modification de code (mode local optionnel).
 - [ ] Une démo est possible en moins de 15-20 minutes.
 
