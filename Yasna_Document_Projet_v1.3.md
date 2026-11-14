@@ -3,7 +3,7 @@
 **Outil d'Analyse et de Nettoyage Intelligent de Bases de Données pour les Administrations Publiques**
 
 **Version 1.3 – Novembre 2026**  
-*(Base de travail produit – prototype terminé)*
+*(Base de travail produit – reprise du développement)*
 
 ## Objectif du document
 

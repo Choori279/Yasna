@@ -17,8 +17,7 @@ L'objectif n'est **pas** de nettoyer une base complète, mais de prouver le comb
 
 **Stratégie IA du PoC** : **API externe configurable par défaut** (fournisseur souverain). Le PoC utilise l'API Mistral standard, **autorisée uniquement parce que les données du PoC sont fictives** (jeu de test + CDC PARINDIE). La couche fournisseur LLM est interchangeable sans modification de code (`LLM_BASE_URL`, `LLM_API_KEY` en `SecretStr`, `LLM_MODEL`, `LLM_PROVIDER_SECNUMCLOUD`) : en production, tout envoi de données sensibles exige un fournisseur **qualifié SecNumCloud** (sur le service d'IA utilisé), sinon l'envoi est bloqué par le code. Le mode local (Ollama) reste **optionnel**.
 
-**Règle de minimisation (données envoyées au LLM)** : par défaut, le LLM ne reçoit que le schéma, les objets SQL et des **statistiques agrégées** (comptages, taux de N
-ULL, distributions, formats détectés), **jamais de lignes brutes**. Si des exemples de lignes sont nécessaires : **pseudonymisation obligatoire** avant envoi (colonnes identifiantes masquées ou remplacées). L'échantillon extrait n'est pas persisté au-delà de la session d'analyse (`À COMPLÉTER : durée de conservation si chiffré`).
+**Règle de minimisation (données envoyées au LLM)** : par défaut, le LLM ne reçoit que le schéma, les objets SQL et des **statistiques agrégées** (comptages, taux de NULL, distributions, formats détectés), **jamais de lignes brutes**. Si des exemples de lignes sont nécessaires : **pseudonymisation obligatoire** avant envoi (colonnes identifiantes masquées ou remplacées). L'échantillon extrait n'est pas persisté au-delà de la session d'analyse (`À COMPLÉTER : durée de conservation si chiffré`).
 
 ## Périmètre du PoC
 
@@ -32,8 +31,7 @@ ULL, distributions, formats détectés), **jamais de lignes brutes**. Si des exe
 | Modifications | UPDATE + rollback générés **sur demande explicite**, jamais exécutés automatiquement ; triggers impactés classés réversibles / non réversibles ; contrôle de dérive embarqué ; rollback testable | Exécution automatique ; refonte de schéma (3NF) |
 | Gouvernance | **Double validation MOA (métier) + technique (MOE/DSI)** par deux personnes distinctes + revue de script structurée + journalisation | Homologation complète |
 | Interface | Streamlit derrière **reverse proxy** (TLS, headers de sécurité) + authentification **OIDC** | Interface avancée |
-| IA | **API externe configurable par défaut** (Mistral, données fictives uniquement) ; mode local optionnel | 
-Fine-tuning |
+| IA | **API externe configurable par défaut** (Mistral, données fictives uniquement) ; mode local optionnel | Fine-tuning |
 | Déploiement | Docker Compose basique | Production hardened |
 
 ## Phases détaillées du PoC
@@ -57,9 +55,8 @@ Fine-tuning |
 
 ### Phase 3 – Connexion à la base (lecture seule)
 - Connexion en **lecture seule** (rôle PostgreSQL à privilèges minimaux, `GRANT SELECT` limités au périmètre, `default_transaction_read_only = on`, `statement_timeout`).
-- Extraction du schéma de la table, de **statistiques agrégées** (comptages, taux de NULL, distributions, formats détectés) et d'un échantillon configurable (pseudonymisé si envoyé au LLM).
-- Extraction des objets SQL associés si disponible
-s (triggers, procédures stockées, vues, contraintes).
+- Extraction du schéma de la table, de **statistiques agrégées** (comptages, taux de NULL, distributions, formats détectés) et d'un échantillon, utilisé uniquement pour l'affichage aux utilisateurs (jamais envoyé au LLM sans pseudonymisation).
+- Extraction des objets SQL associés si disponibles (triggers, procédures stockées, vues, contraintes).
 - Aucune écriture possible à ce stade.
 
 **Livrable** : schéma + statistiques agrégées + objets SQL extraits.
@@ -90,8 +87,7 @@ s (triggers, procédures stockées, vues, contraintes).
 2. **Génération du SELECT** (LLM, à partir du schéma, des objets SQL et des statistiques agrégées).
 3. **Contrôle de la requête** (code — cf. contrôles déterministes : sqlglot + EXPLAIN ; requête refusée = journalisée avec motif).
 4. **Exécution bornée** (code — LIMIT, timeout, rôle lecture seule).
-5. **Explication et revue des résultats au regard des règles** (LLM — statistiques agrégées uniquement, lignes pseudonymisées si nécessaire
-s).
+5. **Explication et revue des résultats au regard des règles** (LLM — statistiques agrégées uniquement, lignes pseudonymisées si nécessaires).
 
 *Le pipeline 4 agents complet (Agents 1 à 4 du Document Projet) reste la **cible post-PoC**.*
 
@@ -114,8 +110,7 @@ s).
 *(Hors parcours en 8 phases.)*
 
 - Documenter les choix techniques principaux.
-- Lister les points de conformité respectés : lecture seule, SELECT bornés et contrôlés de façon déterm
-iniste (sqlglot, EXPLAIN), double validation humaine obligatoire (MOA + technique) et revue de script, minimisation des données envoyées au LLM, couche fournisseur interchangeable, pas de secrets en dur, chat de cadrage limité aux documents projet, rollback testable, contrôle de dérive, journalisation.
+- Lister les points de conformité respectés : lecture seule, SELECT bornés et contrôlés de façon déterministe (sqlglot, EXPLAIN), double validation humaine obligatoire (MOA + technique) et revue de script, minimisation des données envoyées au LLM, couche fournisseur interchangeable, pas de secrets en dur, chat de cadrage limité aux documents projet, rollback testable, contrôle de dérive, journalisation.
 - Préparer une démo claire et reproductible du PoC.
 - Rédiger un court retour d'expérience (ce qui a bien fonctionné / points d'amélioration).
 
@@ -140,8 +135,7 @@ Besoins piégés qui doivent **tous être bloqués** :
 - [ ] La première analyse produit des suggestions de manques expliquées, transformables en besoin (aucune action).
 - [ ] Le pipeline simplifié produit une requête SELECT bornée, **validée par les contrôles déterministes** (sqlglot + EXPLAIN), avec résultats confirmés et revue au regard des règles.
 - [ ] **Taux de détection des anomalies injectées** : `À COMPLÉTER` (ex. ≥ 80 %) par rapport à la liste de référence.
-- [ ] **0 requête hors périmètre exécutée** (table, col
-onnes, types d'instruction).
+- [ ] **0 requête hors périmètre exécutée** (table, colonnes, types d'instruction).
 - [ ] **100 % des requêtes malveillantes du jeu de tests de sécurité rejetées** par le contrôle sqlglot (chaque refus journalisé avec son motif).
 - [ ] Sur demande explicite, les scripts UPDATE + rollback (testable) sont générés, avec estimation d'impact, triggers impactés classés réversibles / non réversibles, et **contrôle de dérive embarqué** ; **100 % des scripts** comportent le contrôle de dérive et un rollback testable.
 - [ ] **Double validation MOA (métier) + technique (MOE/DSI)** obligatoire, par deux personnes distinctes, journalisée ; aucun script exécuté automatiquement.
